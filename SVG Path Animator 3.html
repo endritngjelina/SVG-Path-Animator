@@ -1,0 +1,1304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVG Path Animator Pro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255,255,255,0.05) 0%, transparent 50%),
+                radial-gradient(circle at 60% 30%, rgba(120,119,198,0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 300;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .control-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 35px;
+            box-shadow: 
+                0 25px 50px rgba(0,0,0,0.15),
+                0 0 0 1px rgba(255,255,255,0.1) inset;
+            border: 1px solid rgba(255,255,255,0.2);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .control-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .control-panel:hover::before {
+            left: 100%;
+        }
+
+        .control-panel:hover {
+            transform: translateY(-5px);
+            box-shadow: 
+                0 35px 70px rgba(0,0,0,0.2),
+                0 0 0 1px rgba(255,255,255,0.15) inset;
+        }
+
+        .canvas-area {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 35px;
+            box-shadow: 
+                0 25px 50px rgba(0,0,0,0.15),
+                0 0 0 1px rgba(255,255,255,0.1) inset;
+            border: 1px solid rgba(255,255,255,0.2);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .canvas-area::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .canvas-area:hover::before {
+            left: 100%;
+        }
+
+        .canvas-area:hover {
+            transform: translateY(-3px);
+            box-shadow: 
+                0 35px 70px rgba(0,0,0,0.2),
+                0 0 0 1px rgba(255,255,255,0.15) inset;
+        }
+
+        .section {
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .section::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.2), transparent);
+        }
+
+        .section:last-child::after {
+            display: none;
+        }
+
+        .section h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 18px;
+            color: #4a5568;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .section h3:hover {
+            color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .section-icon {
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 8px;
+            position: relative;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .section-icon::before {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            right: 2px;
+            bottom: 2px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent);
+            border-radius: 6px;
+        }
+
+        .section h3:hover .section-icon {
+            transform: rotate(5deg) scale(1.1);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        textarea, input, select {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid rgba(226, 232, 240, 0.8);
+            border-radius: 16px;
+            font-size: 14px;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            box-shadow: 
+                0 4px 6px rgba(0,0,0,0.05),
+                0 0 0 1px rgba(255,255,255,0.1) inset;
+        }
+
+        textarea:focus, input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            background: rgba(255, 255, 255, 1);
+            box-shadow: 
+                0 0 0 4px rgba(102, 126, 234, 0.1),
+                0 8px 25px rgba(102, 126, 234, 0.15),
+                0 0 0 1px rgba(255,255,255,0.2) inset;
+            transform: translateY(-1px);
+        }
+
+        textarea:hover, input:hover, select:hover {
+            border-color: rgba(102, 126, 234, 0.3);
+            box-shadow: 
+                0 6px 12px rgba(0,0,0,0.08),
+                0 0 0 1px rgba(255,255,255,0.15) inset;
+            transform: translateY(-1px);
+        }
+
+        textarea {
+            min-height: 120px;
+            font-family: 'Courier New', monospace;
+            resize: vertical;
+        }
+
+        .control-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .control-item {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            font-weight: 500;
+            color: #4a5568;
+            font-size: 14px;
+        }
+
+        .range-container {
+            position: relative;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            height: 10px;
+            border-radius: 8px;
+            background: linear-gradient(to right, #667eea, #764ba2);
+            outline: none;
+            position: relative;
+            box-shadow: 
+                0 2px 8px rgba(0,0,0,0.1),
+                0 0 0 1px rgba(255,255,255,0.2) inset;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            cursor: pointer;
+            box-shadow: 
+                0 6px 20px rgba(0,0,0,0.15),
+                0 0 0 3px rgba(102, 126, 234, 0.2),
+                0 0 0 1px rgba(102, 126, 234, 0.3) inset;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+            box-shadow: 
+                0 8px 25px rgba(0,0,0,0.2),
+                0 0 0 4px rgba(102, 126, 234, 0.3),
+                0 0 0 1px rgba(102, 126, 234, 0.4) inset;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:active {
+            transform: scale(1.05);
+        }
+
+        .range-value {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            box-shadow: 
+                0 4px 12px rgba(102, 126, 234, 0.3),
+                0 0 0 1px rgba(255,255,255,0.2) inset;
+            transition: all 0.3s ease;
+        }
+
+        .range-value::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            right: 10px;
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 5px solid #667eea;
+        }
+
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 16px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.6s ease;
+        }
+
+        .btn:active::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 
+                0 8px 32px rgba(102, 126, 234, 0.4),
+                0 0 0 1px rgba(255,255,255,0.1) inset;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 
+                0 15px 40px rgba(102, 126, 234, 0.5),
+                0 0 0 1px rgba(255,255,255,0.2) inset;
+            background: linear-gradient(135deg, #7c8df0 0%, #8a5cb8 100%);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.9);
+            color: #667eea;
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            box-shadow: 
+                0 4px 20px rgba(102, 126, 234, 0.1),
+                0 0 0 1px rgba(255,255,255,0.2) inset;
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 
+                0 12px 30px rgba(102, 126, 234, 0.3),
+                0 0 0 1px rgba(255,255,255,0.1) inset;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+            color: white;
+            box-shadow: 
+                0 8px 32px rgba(229, 62, 62, 0.4),
+                0 0 0 1px rgba(255,255,255,0.1) inset;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 
+                0 15px 40px rgba(229, 62, 62, 0.5),
+                0 0 0 1px rgba(255,255,255,0.2) inset;
+            background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .svg-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 450px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 
+                0 8px 32px rgba(0,0,0,0.1) inset,
+                0 0 0 1px rgba(255,255,255,0.5) inset;
+            transition: all 0.4s ease;
+        }
+
+        .svg-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 30% 30%, rgba(102, 126, 234, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 70% 70%, rgba(118, 75, 162, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .svg-container:hover {
+            box-shadow: 
+                0 12px 40px rgba(0,0,0,0.15) inset,
+                0 0 0 1px rgba(255,255,255,0.6) inset;
+            transform: scale(1.01);
+        }
+
+        #animationSvg {
+            max-width: 100%;
+            max-height: 100%;
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            filter: drop-shadow(0 8px 32px rgba(102, 126, 234, 0.15));
+            z-index: 1;
+            position: relative;
+        }
+
+        #animationSvg:hover {
+            transform: scale(1.02);
+            filter: drop-shadow(0 12px 40px rgba(102, 126, 234, 0.2));
+        }
+
+        .stats-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: 
+                0 25px 50px rgba(0,0,0,0.15),
+                0 0 0 1px rgba(255,255,255,0.1) inset;
+            border: 1px solid rgba(255,255,255,0.2);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .stats-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .stats-panel:hover::before {
+            left: 100%;
+        }
+
+        .stats-panel:hover {
+            transform: translateY(-3px);
+            box-shadow: 
+                0 35px 70px rgba(0,0,0,0.2),
+                0 0 0 1px rgba(255,255,255,0.15) inset;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 20px 15px;
+            background: linear-gradient(135deg, rgba(248, 250, 252, 0.9) 0%, rgba(226, 232, 240, 0.7) 100%);
+            border-radius: 16px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+            border: 1px solid rgba(255,255,255,0.3);
+            box-shadow: 
+                0 4px 20px rgba(0,0,0,0.05),
+                0 0 0 1px rgba(255,255,255,0.2) inset;
+        }
+
+        .stat-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-item:hover::before {
+            transform: scaleX(1);
+        }
+
+        .stat-item:hover {
+            transform: translateY(-3px) scale(1.02);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%);
+            box-shadow: 
+                0 12px 40px rgba(102, 126, 234, 0.15),
+                0 0 0 1px rgba(255,255,255,0.4) inset;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .preset-paths {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .preset-btn {
+            padding: 12px 16px;
+            background: rgba(248, 250, 252, 0.9);
+            border: 2px solid rgba(226, 232, 240, 0.5);
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .preset-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .preset-btn:hover::before {
+            left: 100%;
+        }
+
+        .preset-btn:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 
+                0 8px 25px rgba(102, 126, 234, 0.3),
+                0 0 0 1px rgba(255,255,255,0.2) inset;
+        }
+
+        .preset-btn:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        .progress-container {
+            margin-top: 25px;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(248, 250, 252, 0.9) 0%, rgba(226, 232, 240, 0.7) 100%);
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.3);
+            box-shadow: 
+                0 4px 20px rgba(0,0,0,0.05),
+                0 0 0 1px rgba(255,255,255,0.2) inset;
+            transition: all 0.3s ease;
+        }
+
+        .progress-container:hover {
+            transform: translateY(-1px);
+            box-shadow: 
+                0 8px 30px rgba(0,0,0,0.1),
+                0 0 0 1px rgba(255,255,255,0.3) inset;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: rgba(226, 232, 240, 0.8);
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1) inset;
+            position: relative;
+        }
+
+        .progress-bar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: rgba(255,255,255,0.5);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.2s cubic-bezier(0.23, 1, 0.32, 1);
+            border-radius: 8px;
+            position: relative;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            background: linear-gradient(180deg, rgba(255,255,255,0.3) 0%, transparent 100%);
+            border-radius: 8px 8px 0 0;
+        }
+
+        .time-display {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .error-message {
+            background: linear-gradient(135deg, #fed7d7 0%, #feb2b2 100%);
+            color: #c53030;
+            padding: 15px 18px;
+            border-radius: 12px;
+            margin-top: 12px;
+            font-size: 14px;
+            border: 1px solid rgba(229, 62, 62, 0.2);
+            box-shadow: 
+                0 4px 12px rgba(229, 62, 62, 0.1),
+                0 0 0 1px rgba(255,255,255,0.3) inset;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideInError 0.3s ease;
+        }
+
+        .error-message::before {
+            content: '⚠️';
+            font-size: 16px;
+        }
+
+        .success-message {
+            background: linear-gradient(135deg, #c6f6d5 0%, #9ae6b4 100%);
+            color: #25543e;
+            padding: 15px 18px;
+            border-radius: 12px;
+            margin-top: 12px;
+            font-size: 14px;
+            border: 1px solid rgba(56, 178, 172, 0.2);
+            box-shadow: 
+                0 4px 12px rgba(56, 178, 172, 0.1),
+                0 0 0 1px rgba(255,255,255,0.3) inset;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideInSuccess 0.3s ease;
+        }
+
+        .success-message::before {
+            content: '✅';
+            font-size: 16px;
+        }
+
+        @keyframes slideInError {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+                background: linear-gradient(135deg, #fed7d7 0%, #feb2b2 100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInSuccess {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+                background: linear-gradient(135deg, #c6f6d5 0%, #9ae6b4 100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .control-group {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+        }
+
+        @keyframes fadeIn {
+            from { 
+                opacity: 0; 
+                transform: translateY(30px) scale(0.95);
+                filter: blur(5px);
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0) scale(1);
+                filter: blur(0px);
+            }
+        }
+
+        /* Loading animation for elements */
+        .loading {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .loading::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        /* Pulse animation for active elements */
+        .pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: .8;
+            }
+        }
+
+        /* Micro-interactions */
+        .btn, .preset-btn, .stat-item, input, textarea, select {
+            will-change: transform;
+        }
+
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Focus visible for accessibility */
+        *:focus-visible {
+            outline: 2px solid #667eea;
+            outline-offset: 2px;
+            border-radius: 4px;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(226, 232, 240, 0.3);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #7c8df0, #8a5cb8);
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            height: 10px;
+            border-radius: 8px;
+            background: linear-gradient(to right, #667eea, #764ba2);
+            outline: none;
+            position: relative;
+            box-shadow: 
+                0 2px 8px rgba(0,0,0,0.1),
+                0 0 0 1px rgba(255,255,255,0.2) inset;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            cursor: pointer;
+            box-shadow: 
+                0 6px 20px rgba(0,0,0,0.15),
+                0 0 0 3px rgba(102, 126, 234, 0.2),
+                0 0 0 1px rgba(102, 126, 234, 0.3) inset;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+            box-shadow: 
+                0 8px 25px rgba(0,0,0,0.2),
+                0 0 0 4px rgba(102, 126, 234, 0.3),
+                0 0 0 1px rgba(102, 126, 234, 0.4) inset;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:active {
+            transform: scale(1.05);
+        }
+
+        .range-value {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header fade-in">
+            <h1>SVG Path Animator Pro</h1>
+            <p>Professional-grade path animation with advanced controls and real-time preview</p>
+        </div>
+
+        <div class="main-grid">
+            <div class="control-panel fade-in">
+                <div class="section">
+                    <h3><div class="section-icon"></div>SVG Path Input</h3>
+                    <textarea id="pathInput" placeholder="Paste your SVG path data here (e.g., M10,10 L100,100 C150,50 200,150 250,100)"></textarea>
+                    <div class="preset-paths">
+                        <div class="preset-btn" onclick="loadPreset('heart')">❤️ Heart</div>
+                        <div class="preset-btn" onclick="loadPreset('star')">⭐ Star</div>
+                        <div class="preset-btn" onclick="loadPreset('spiral')">🌀 Spiral</div>
+                        <div class="preset-btn" onclick="loadPreset('wave')">〰️ Wave</div>
+                        <div class="preset-btn" onclick="loadPreset('lightning')">⚡ Lightning</div>
+                        <div class="preset-btn" onclick="loadPreset('flower')">🌸 Flower</div>
+                    </div>
+                    <div id="pathMessage"></div>
+                </div>
+
+                <div class="section">
+                    <h3><div class="section-icon"></div>Animation Controls</h3>
+                    <div class="control-group">
+                        <div class="control-item">
+                            <label for="duration">Duration (seconds)</label>
+                            <div class="range-container">
+                                <input type="range" id="duration" min="0.5" max="10" step="0.1" value="3">
+                                <span class="range-value" id="durationValue">3.0s</span>
+                            </div>
+                        </div>
+                        <div class="control-item">
+                            <label for="easing">Easing Function</label>
+                            <select id="easing">
+                                <option value="linear">Linear</option>
+                                <option value="ease">Ease</option>
+                                <option value="ease-in">Ease In</option>
+                                <option value="ease-out" selected>Ease Out</option>
+                                <option value="ease-in-out">Ease In-Out</option>
+                                <option value="cubic-bezier(0.68, -0.55, 0.265, 1.55)">Bounce</option>
+                                <option value="cubic-bezier(0.25, 0.46, 0.45, 0.94)">Smooth</option>
+                                <option value="cubic-bezier(0.175, 0.885, 0.32, 1.275)">Back</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3><div class="section-icon"></div>Visual Settings</h3>
+                    <div class="control-group">
+                        <div class="control-item">
+                            <label for="strokeWidth">Stroke Width</label>
+                            <div class="range-container">
+                                <input type="range" id="strokeWidth" min="1" max="20" value="3">
+                                <span class="range-value" id="strokeWidthValue">3px</span>
+                            </div>
+                        </div>
+                        <div class="control-item">
+                            <label for="strokeColor">Stroke Color</label>
+                            <input type="color" id="strokeColor" value="#667eea">
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <div class="control-item">
+                            <label for="backgroundColor">Background</label>
+                            <input type="color" id="backgroundColor" value="#f8fafc">
+                        </div>
+                        <div class="control-item">
+                            <label for="dashArray">Dash Pattern</label>
+                            <input type="text" id="dashArray" placeholder="e.g., 5,5 or 10,3,2,3">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="startAnimation()">▶️ Animate</button>
+                    <button class="btn btn-secondary" onclick="pauseAnimation()">⏸️ Pause</button>
+                    <button class="btn btn-danger" onclick="resetAnimation()">⏹️ Stop</button>
+                </div>
+
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="time-display">
+                        <span id="currentTime">0.0s</span>
+                        <span id="totalTime">3.0s</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="canvas-area fade-in">
+                <div class="svg-container">
+                    <svg id="animationSvg" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+                        <path id="animatedPath" d="" fill="none" stroke="#667eea" stroke-width="3"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-panel fade-in">
+            <div class="section">
+                <h3><div class="section-icon"></div>Animation Statistics</h3>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value" id="pathLength">0</div>
+                        <div class="stat-label">Path Length</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="animationSpeed">0</div>
+                        <div class="stat-label">Speed (px/s)</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="frameRate">60</div>
+                        <div class="stat-label">Target FPS</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="pathCommands">0</div>
+                        <div class="stat-label">Path Commands</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class SVGPathAnimator {
+            constructor() {
+                this.svg = document.getElementById('animationSvg');
+                this.path = document.getElementById('animatedPath');
+                this.isAnimating = false;
+                this.isPaused = false;
+                this.animationId = null;
+                this.startTime = null;
+                this.pausedTime = 0;
+                this.totalPathLength = 0;
+                
+                this.initializeEventListeners();
+                this.loadPreset('heart'); // Load default preset
+            }
+
+            initializeEventListeners() {
+                // Range input updates
+                document.getElementById('duration').addEventListener('input', (e) => {
+                    document.getElementById('durationValue').textContent = parseFloat(e.target.value).toFixed(1) + 's';
+                    document.getElementById('totalTime').textContent = parseFloat(e.target.value).toFixed(1) + 's';
+                    this.updateStats();
+                });
+
+                document.getElementById('strokeWidth').addEventListener('input', (e) => {
+                    document.getElementById('strokeWidthValue').textContent = e.target.value + 'px';
+                    this.path.setAttribute('stroke-width', e.target.value);
+                });
+
+                // Color and style updates
+                document.getElementById('strokeColor').addEventListener('input', (e) => {
+                    this.path.setAttribute('stroke', e.target.value);
+                });
+
+                document.getElementById('backgroundColor').addEventListener('input', (e) => {
+                    document.querySelector('.svg-container').style.backgroundColor = e.target.value;
+                });
+
+                document.getElementById('dashArray').addEventListener('input', (e) => {
+                    this.path.setAttribute('stroke-dasharray', e.target.value || 'none');
+                });
+
+                // Path input updates
+                document.getElementById('pathInput').addEventListener('input', () => {
+                    this.updatePath();
+                });
+
+                // Keyboard shortcuts
+                document.addEventListener('keydown', (e) => {
+                    if (e.code === 'Space') {
+                        e.preventDefault();
+                        this.isAnimating ? this.pauseAnimation() : this.startAnimation();
+                    } else if (e.code === 'Escape') {
+                        this.resetAnimation();
+                    }
+                });
+            }
+
+            updatePath() {
+                const pathData = document.getElementById('pathInput').value.trim();
+                const messageEl = document.getElementById('pathMessage');
+                
+                if (!pathData) {
+                    this.clearMessage();
+                    return;
+                }
+
+                try {
+                    this.path.setAttribute('d', pathData);
+                    this.totalPathLength = this.path.getTotalLength();
+                    
+                    if (this.totalPathLength > 0) {
+                        this.optimizeViewBox();
+                        this.updateStats();
+                        this.showMessage('Path loaded successfully!', 'success');
+                        this.resetAnimation();
+                    } else {
+                        throw new Error('Invalid path data');
+                    }
+                } catch (error) {
+                    this.showMessage('Invalid SVG path data. Please check your input.', 'error');
+                    this.path.setAttribute('d', '');
+                }
+            }
+
+            optimizeViewBox() {
+                try {
+                    const bbox = this.path.getBBox();
+                    const padding = 20;
+                    const viewBox = `${bbox.x - padding} ${bbox.y - padding} ${bbox.width + 2 * padding} ${bbox.height + 2 * padding}`;
+                    this.svg.setAttribute('viewBox', viewBox);
+                } catch (error) {
+                    // Fallback to default viewBox if getBBox fails
+                    this.svg.setAttribute('viewBox', '0 0 400 300');
+                }
+            }
+
+            startAnimation() {
+                if (!this.totalPathLength) {
+                    this.showMessage('Please enter a valid SVG path first.', 'error');
+                    return;
+                }
+
+                const duration = parseFloat(document.getElementById('duration').value) * 1000;
+                const easing = document.getElementById('easing').value;
+
+                if (this.isPaused) {
+                    this.isPaused = false;
+                    this.startTime = performance.now() - this.pausedTime;
+                } else {
+                    this.startTime = performance.now();
+                    this.pausedTime = 0;
+                }
+
+                this.isAnimating = true;
+                
+                // Set up initial state
+                this.path.style.strokeDasharray = this.totalPathLength;
+                this.path.style.strokeDashoffset = this.totalPathLength;
+                this.path.style.transition = 'none';
+
+                // Start animation
+                setTimeout(() => {
+                    this.path.style.transition = `stroke-dashoffset ${duration}ms ${easing}`;
+                    this.path.style.strokeDashoffset = '0';
+                }, 10);
+
+                this.animateProgress(duration);
+                this.showMessage('Animation started!', 'success');
+            }
+
+            pauseAnimation() {
+                if (!this.isAnimating) return;
+
+                this.isPaused = true;
+                this.isAnimating = false;
+                this.pausedTime = performance.now() - this.startTime;
+                
+                if (this.animationId) {
+                    cancelAnimationFrame(this.animationId);
+                }
+
+                // Freeze the current state
+                const computedStyle = getComputedStyle(this.path);
+                const currentOffset = computedStyle.strokeDashoffset;
+                this.path.style.transition = 'none';
+                this.path.style.strokeDashoffset = currentOffset;
+
+                this.showMessage('Animation paused.', 'success');
+            }
+
+            resetAnimation() {
+                this.isAnimating = false;
+                this.isPaused = false;
+                this.startTime = null;
+                this.pausedTime = 0;
+
+                if (this.animationId) {
+                    cancelAnimationFrame(this.animationId);
+                }
+
+                this.path.style.transition = 'none';
+                this.path.style.strokeDasharray = this.totalPathLength;
+                this.path.style.strokeDashoffset = this.totalPathLength;
+
+                document.getElementById('progressFill').style.width = '0%';
+                document.getElementById('currentTime').textContent = '0.0s';
+
+                this.clearMessage();
+            }
+
+            animateProgress(duration) {
+                const updateProgress = () => {
+                    if (!this.isAnimating && !this.isPaused) return;
+
+                    const elapsed = performance.now() - this.startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+
+                    document.getElementById('progressFill').style.width = (progress * 100) + '%';
+                    document.getElementById('currentTime').textContent = (elapsed / 1000).toFixed(1) + 's';
+
+                    if (progress < 1 && this.isAnimating) {
+                        this.animationId = requestAnimationFrame(updateProgress);
+                    } else if (progress >= 1) {
+                        this.isAnimating = false;
+                        this.showMessage('Animation completed!', 'success');
+                    }
+                };
+
+                this.animationId = requestAnimationFrame(updateProgress);
+            }
+
+            updateStats() {
+                const duration = parseFloat(document.getElementById('duration').value);
+                const speed = this.totalPathLength / duration;
+                const pathData = document.getElementById('pathInput').value;
+                const commands = pathData.match(/[MLHVCSQTAZ]/gi)?.length || 0;
+
+                document.getElementById('pathLength').textContent = Math.round(this.totalPathLength);
+                document.getElementById('animationSpeed').textContent = Math.round(speed);
+                document.getElementById('pathCommands').textContent = commands;
+            }
+
+            showMessage(text, type) {
+                const messageEl = document.getElementById('pathMessage');
+                messageEl.className = type === 'error' ? 'error-message' : 'success-message';
+                messageEl.textContent = text;
+                messageEl.style.display = 'block';
+
+                setTimeout(() => {
+                    if (messageEl.textContent === text) {
+                        this.clearMessage();
+                    }
+                }, 3000);
+            }
+
+            clearMessage() {
+                const messageEl = document.getElementById('pathMessage');
+                messageEl.style.display = 'none';
+                messageEl.textContent = '';
+            }
+        }
+
+        // Preset path data
+        const presetPaths = {
+            heart: "M12,21.35l-1.45-1.32C5.4,15.36,2,12.28,2,8.5 C2,5.42,4.42,3,7.5,3c1.74,0,3.41,0.81,4.5,2.09C13.09,3.81,14.76,3,16.5,3 C19.58,3,22,5.42,22,8.5c0,3.78-3.4,6.86-8.55,11.54L12,21.35z",
+            star: "M12,2l3.09,6.26L22,9.27l-5,4.87 L18.18,21L12,17.77L5.82,21L7,14.14L2,9.27l6.91-1.01L12,2z",
+            spiral: "M150,150 m-50,0 a50,50 0 1,1 100,0 a40,40 0 1,1 -80,0 a30,30 0 1,1 60,0 a20,20 0 1,1 -40,0 a10,10 0 1,1 20,0",
+            wave: "M10,150 Q60,50 110,150 T210,150 T310,150 T410,150",
+            lightning: "M100,50 L120,100 L110,100 L130,150 L90,120 L100,120 L80,100 Z",
+            flower: "M150,150 m0,-50 a25,25 0 0,0 -50,0 a25,25 0 0,0 0,50 a25,25 0 0,0 50,0 a25,25 0 0,0 0,-50 m-35.36,-35.36 a25,25 0 0,0 -35.36,35.36 a25,25 0 0,0 35.36,35.36 a25,25 0 0,0 35.36,-35.36 a25,25 0 0,0 -35.36,-35.36"
+        };
+
+        function loadPreset(presetKey) {
+            if (presetPaths[presetKey]) {
+                document.getElementById('pathInput').value = presetPaths[presetKey];
+                animator.updatePath();
+            }
+        }
+
+        function startAnimation() {
+            animator.startAnimation();
+        }
+
+        function pauseAnimation() {
+            animator.pauseAnimation();
+        }
+
+        function resetAnimation() {
+            animator.resetAnimation();
+        }
+
+        // Initialize the animator
+        const animator = new SVGPathAnimator();
+
+        // Add some visual polish
+        document.addEventListener('DOMContentLoaded', () => {
+            // Stagger fade-in animations
+            const elements = document.querySelectorAll('.fade-in');
+            elements.forEach((el, index) => {
+                el.style.animationDelay = `${index * 0.1}s`;
+            });
+        });
+    </script>
+</body>
+</html>
