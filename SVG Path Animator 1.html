@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVG Path Animator Pro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 300;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .control-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .canvas-area {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .section {
+            margin-bottom: 25px;
+        }
+
+        .section h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #4a5568;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-icon {
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 50%;
+        }
+
+        textarea, input, select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        textarea:focus, input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea {
+            min-height: 120px;
+            font-family: 'Courier New', monospace;
+            resize: vertical;
+        }
+
+        .control-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .control-item {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            font-weight: 500;
+            color: #4a5568;
+            font-size: 14px;
+        }
+
+        .range-container {
+            position: relative;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            height: 8px;
+            border-radius: 4px;
+            background: linear-gradient(to right, #667eea, #764ba2);
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            border: 3px solid #667eea;
+        }
+
+        .range-value {
+            position: absolute;
+            top: -35px;
+            right: 0;
+            background: #667eea;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn-secondary:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(45deg, #e53e3e, #c53030);
+            color: white;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .svg-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 400px;
+            background: #f8fafc;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #animationSvg {
+            max-width: 100%;
+            max-height: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .stats-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+            border-radius: 12px;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .preset-paths {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .preset-btn {
+            padding: 8px 12px;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .preset-btn:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .progress-container {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8fafc;
+            border-radius: 12px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.1s ease;
+        }
+
+        .time-display {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .error-message {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 14px;
+            border: 1px solid #feb2b2;
+        }
+
+        .success-message {
+            background: #c6f6d5;
+            color: #25543e;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 14px;
+            border: 1px solid #9ae6b4;
+        }
+
+        @media (max-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .control-group {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.6s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header fade-in">
+            <h1>SVG Path Animator Pro</h1>
+            <p>Professional-grade path animation with advanced controls and real-time preview</p>
+        </div>
+
+        <div class="main-grid">
+            <div class="control-panel fade-in">
+                <div class="section">
+                    <h3><div class="section-icon"></div>SVG Path Input</h3>
+                    <textarea id="pathInput" placeholder="Paste your SVG path data here (e.g., M10,10 L100,100 C150,50 200,150 250,100)"></textarea>
+                    <div class="preset-paths">
+                        <div class="preset-btn" onclick="loadPreset('heart')">❤️ Heart</div>
+                        <div class="preset-btn" onclick="loadPreset('star')">⭐ Star</div>
+                        <div class="preset-btn" onclick="loadPreset('spiral')">🌀 Spiral</div>
+                        <div class="preset-btn" onclick="loadPreset('wave')">〰️ Wave</div>
+                        <div class="preset-btn" onclick="loadPreset('lightning')">⚡ Lightning</div>
+                        <div class="preset-btn" onclick="loadPreset('flower')">🌸 Flower</div>
+                    </div>
+                    <div id="pathMessage"></div>
+                </div>
+
+                <div class="section">
+                    <h3><div class="section-icon"></div>Animation Controls</h3>
+                    <div class="control-group">
+                        <div class="control-item">
+                            <label for="duration">Duration (seconds)</label>
+                            <div class="range-container">
+                                <input type="range" id="duration" min="0.5" max="10" step="0.1" value="3">
+                                <span class="range-value" id="durationValue">3.0s</span>
+                            </div>
+                        </div>
+                        <div class="control-item">
+                            <label for="easing">Easing Function</label>
+                            <select id="easing">
+                                <option value="linear">Linear</option>
+                                <option value="ease">Ease</option>
+                                <option value="ease-in">Ease In</option>
+                                <option value="ease-out" selected>Ease Out</option>
+                                <option value="ease-in-out">Ease In-Out</option>
+                                <option value="cubic-bezier(0.68, -0.55, 0.265, 1.55)">Bounce</option>
+                                <option value="cubic-bezier(0.25, 0.46, 0.45, 0.94)">Smooth</option>
+                                <option value="cubic-bezier(0.175, 0.885, 0.32, 1.275)">Back</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3><div class="section-icon"></div>Visual Settings</h3>
+                    <div class="control-group">
+                        <div class="control-item">
+                            <label for="strokeWidth">Stroke Width</label>
+                            <div class="range-container">
+                                <input type="range" id="strokeWidth" min="1" max="20" value="3">
+                                <span class="range-value" id="strokeWidthValue">3px</span>
+                            </div>
+                        </div>
+                        <div class="control-item">
+                            <label for="strokeColor">Stroke Color</label>
+                            <input type="color" id="strokeColor" value="#667eea">
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <div class="control-item">
+                            <label for="backgroundColor">Background</label>
+                            <input type="color" id="backgroundColor" value="#f8fafc">
+                        </div>
+                        <div class="control-item">
+                            <label for="dashArray">Dash Pattern</label>
+                            <input type="text" id="dashArray" placeholder="e.g., 5,5 or 10,3,2,3">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="startAnimation()">▶️ Animate</button>
+                    <button class="btn btn-secondary" onclick="pauseAnimation()">⏸️ Pause</button>
+                    <button class="btn btn-danger" onclick="resetAnimation()">⏹️ Stop</button>
+                </div>
+
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="time-display">
+                        <span id="currentTime">0.0s</span>
+                        <span id="totalTime">3.0s</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="canvas-area fade-in">
+                <div class="svg-container">
+                    <svg id="animationSvg" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+                        <path id="animatedPath" d="" fill="none" stroke="#667eea" stroke-width="3"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-panel fade-in">
+            <div class="section">
+                <h3><div class="section-icon"></div>Animation Statistics</h3>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value" id="pathLength">0</div>
+                        <div class="stat-label">Path Length</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="animationSpeed">0</div>
+                        <div class="stat-label">Speed (px/s)</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="frameRate">60</div>
+                        <div class="stat-label">Target FPS</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="pathCommands">0</div>
+                        <div class="stat-label">Path Commands</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class SVGPathAnimator {
+            constructor() {
+                this.svg = document.getElementById('animationSvg');
+                this.path = document.getElementById('animatedPath');
+                this.isAnimating = false;
+                this.isPaused = false;
+                this.animationId = null;
+                this.startTime = null;
+                this.pausedTime = 0;
+                this.totalPathLength = 0;
+                
+                this.initializeEventListeners();
+                this.loadPreset('heart'); // Load default preset
+            }
+
+            initializeEventListeners() {
+                // Range input updates
+                document.getElementById('duration').addEventListener('input', (e) => {
+                    document.getElementById('durationValue').textContent = parseFloat(e.target.value).toFixed(1) + 's';
+                    document.getElementById('totalTime').textContent = parseFloat(e.target.value).toFixed(1) + 's';
+                    this.updateStats();
+                });
+
+                document.getElementById('strokeWidth').addEventListener('input', (e) => {
+                    document.getElementById('strokeWidthValue').textContent = e.target.value + 'px';
+                    this.path.setAttribute('stroke-width', e.target.value);
+                });
+
+                // Color and style updates
+                document.getElementById('strokeColor').addEventListener('input', (e) => {
+                    this.path.setAttribute('stroke', e.target.value);
+                });
+
+                document.getElementById('backgroundColor').addEventListener('input', (e) => {
+                    document.querySelector('.svg-container').style.backgroundColor = e.target.value;
+                });
+
+                document.getElementById('dashArray').addEventListener('input', (e) => {
+                    this.path.setAttribute('stroke-dasharray', e.target.value || 'none');
+                });
+
+                // Path input updates
+                document.getElementById('pathInput').addEventListener('input', () => {
+                    this.updatePath();
+                });
+
+                // Keyboard shortcuts
+                document.addEventListener('keydown', (e) => {
+                    if (e.code === 'Space') {
+                        e.preventDefault();
+                        this.isAnimating ? this.pauseAnimation() : this.startAnimation();
+                    } else if (e.code === 'Escape') {
+                        this.resetAnimation();
+                    }
+                });
+            }
+
+            updatePath() {
+                const pathData = document.getElementById('pathInput').value.trim();
+                const messageEl = document.getElementById('pathMessage');
+                
+                if (!pathData) {
+                    this.clearMessage();
+                    return;
+                }
+
+                try {
+                    this.path.setAttribute('d', pathData);
+                    this.totalPathLength = this.path.getTotalLength();
+                    
+                    if (this.totalPathLength > 0) {
+                        this.optimizeViewBox();
+                        this.updateStats();
+                        this.showMessage('Path loaded successfully!', 'success');
+                        this.resetAnimation();
+                    } else {
+                        throw new Error('Invalid path data');
+                    }
+                } catch (error) {
+                    this.showMessage('Invalid SVG path data. Please check your input.', 'error');
+                    this.path.setAttribute('d', '');
+                }
+            }
+
+            optimizeViewBox() {
+                try {
+                    const bbox = this.path.getBBox();
+                    const padding = 20;
+                    const viewBox = `${bbox.x - padding} ${bbox.y - padding} ${bbox.width + 2 * padding} ${bbox.height + 2 * padding}`;
+                    this.svg.setAttribute('viewBox', viewBox);
+                } catch (error) {
+                    // Fallback to default viewBox if getBBox fails
+                    this.svg.setAttribute('viewBox', '0 0 400 300');
+                }
+            }
+
+            startAnimation() {
+                if (!this.totalPathLength) {
+                    this.showMessage('Please enter a valid SVG path first.', 'error');
+                    return;
+                }
+
+                const duration = parseFloat(document.getElementById('duration').value) * 1000;
+                const easing = document.getElementById('easing').value;
+
+                if (this.isPaused) {
+                    this.isPaused = false;
+                    this.startTime = performance.now() - this.pausedTime;
+                } else {
+                    this.startTime = performance.now();
+                    this.pausedTime = 0;
+                }
+
+                this.isAnimating = true;
+                
+                // Set up initial state
+                this.path.style.strokeDasharray = this.totalPathLength;
+                this.path.style.strokeDashoffset = this.totalPathLength;
+                this.path.style.transition = 'none';
+
+                // Start animation
+                setTimeout(() => {
+                    this.path.style.transition = `stroke-dashoffset ${duration}ms ${easing}`;
+                    this.path.style.strokeDashoffset = '0';
+                }, 10);
+
+                this.animateProgress(duration);
+                this.showMessage('Animation started!', 'success');
+            }
+
+            pauseAnimation() {
+                if (!this.isAnimating) return;
+
+                this.isPaused = true;
+                this.isAnimating = false;
+                this.pausedTime = performance.now() - this.startTime;
+                
+                if (this.animationId) {
+                    cancelAnimationFrame(this.animationId);
+                }
+
+                // Freeze the current state
+                const computedStyle = getComputedStyle(this.path);
+                const currentOffset = computedStyle.strokeDashoffset;
+                this.path.style.transition = 'none';
+                this.path.style.strokeDashoffset = currentOffset;
+
+                this.showMessage('Animation paused.', 'success');
+            }
+
+            resetAnimation() {
+                this.isAnimating = false;
+                this.isPaused = false;
+                this.startTime = null;
+                this.pausedTime = 0;
+
+                if (this.animationId) {
+                    cancelAnimationFrame(this.animationId);
+                }
+
+                this.path.style.transition = 'none';
+                this.path.style.strokeDasharray = this.totalPathLength;
+                this.path.style.strokeDashoffset = this.totalPathLength;
+
+                document.getElementById('progressFill').style.width = '0%';
+                document.getElementById('currentTime').textContent = '0.0s';
+
+                this.clearMessage();
+            }
+
+            animateProgress(duration) {
+                const updateProgress = () => {
+                    if (!this.isAnimating && !this.isPaused) return;
+
+                    const elapsed = performance.now() - this.startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+
+                    document.getElementById('progressFill').style.width = (progress * 100) + '%';
+                    document.getElementById('currentTime').textContent = (elapsed / 1000).toFixed(1) + 's';
+
+                    if (progress < 1 && this.isAnimating) {
+                        this.animationId = requestAnimationFrame(updateProgress);
+                    } else if (progress >= 1) {
+                        this.isAnimating = false;
+                        this.showMessage('Animation completed!', 'success');
+                    }
+                };
+
+                this.animationId = requestAnimationFrame(updateProgress);
+            }
+
+            updateStats() {
+                const duration = parseFloat(document.getElementById('duration').value);
+                const speed = this.totalPathLength / duration;
+                const pathData = document.getElementById('pathInput').value;
+                const commands = pathData.match(/[MLHVCSQTAZ]/gi)?.length || 0;
+
+                document.getElementById('pathLength').textContent = Math.round(this.totalPathLength);
+                document.getElementById('animationSpeed').textContent = Math.round(speed);
+                document.getElementById('pathCommands').textContent = commands;
+            }
+
+            showMessage(text, type) {
+                const messageEl = document.getElementById('pathMessage');
+                messageEl.className = type === 'error' ? 'error-message' : 'success-message';
+                messageEl.textContent = text;
+                messageEl.style.display = 'block';
+
+                setTimeout(() => {
+                    if (messageEl.textContent === text) {
+                        this.clearMessage();
+                    }
+                }, 3000);
+            }
+
+            clearMessage() {
+                const messageEl = document.getElementById('pathMessage');
+                messageEl.style.display = 'none';
+                messageEl.textContent = '';
+            }
+        }
+
+        // Preset path data
+        const presetPaths = {
+            heart: "M12,21.35l-1.45-1.32C5.4,15.36,2,12.28,2,8.5 C2,5.42,4.42,3,7.5,3c1.74,0,3.41,0.81,4.5,2.09C13.09,3.81,14.76,3,16.5,3 C19.58,3,22,5.42,22,8.5c0,3.78-3.4,6.86-8.55,11.54L12,21.35z",
+            star: "M12,2l3.09,6.26L22,9.27l-5,4.87 L18.18,21L12,17.77L5.82,21L7,14.14L2,9.27l6.91-1.01L12,2z",
+            spiral: "M150,150 m-50,0 a50,50 0 1,1 100,0 a40,40 0 1,1 -80,0 a30,30 0 1,1 60,0 a20,20 0 1,1 -40,0 a10,10 0 1,1 20,0",
+            wave: "M10,150 Q60,50 110,150 T210,150 T310,150 T410,150",
+            lightning: "M100,50 L120,100 L110,100 L130,150 L90,120 L100,120 L80,100 Z",
+            flower: "M150,150 m0,-50 a25,25 0 0,0 -50,0 a25,25 0 0,0 0,50 a25,25 0 0,0 50,0 a25,25 0 0,0 0,-50 m-35.36,-35.36 a25,25 0 0,0 -35.36,35.36 a25,25 0 0,0 35.36,35.36 a25,25 0 0,0 35.36,-35.36 a25,25 0 0,0 -35.36,-35.36"
+        };
+
+        function loadPreset(presetKey) {
+            if (presetPaths[presetKey]) {
+                document.getElementById('pathInput').value = presetPaths[presetKey];
+                animator.updatePath();
+            }
+        }
+
+        function startAnimation() {
+            animator.startAnimation();
+        }
+
+        function pauseAnimation() {
+            animator.pauseAnimation();
+        }
+
+        function resetAnimation() {
+            animator.resetAnimation();
+        }
+
+        // Initialize the animator
+        const animator = new SVGPathAnimator();
+
+        // Add some visual polish
+        document.addEventListener('DOMContentLoaded', () => {
+            // Stagger fade-in animations
+            const elements = document.querySelectorAll('.fade-in');
+            elements.forEach((el, index) => {
+                el.style.animationDelay = `${index * 0.1}s`;
+            });
+        });
+    </script>
+</body>
+</html>
