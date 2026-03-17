@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVG Path Animator Pro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+            min-height: 100vh;
+        }
+
+        .control-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+
+        .preview-area {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 24px;
+            font-size: 28px;
+            font-weight: 700;
+            text-align: center;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section {
+            margin-bottom: 24px;
+            padding: 16px;
+            background: rgba(248, 249, 250, 0.8);
+            border-radius: 12px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .section h3 {
+            color: #2c3e50;
+            margin-bottom: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+
+        .section h3::before {
+            content: '';
+            width: 4px;
+            height: 16px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 2px;
+            margin-right: 8px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 120px;
+            padding: 12px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            resize: vertical;
+            transition: border-color 0.3s ease;
+            background: white;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .control-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #555;
+            font-size: 14px;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #e1e8ed;
+            outline: none;
+            -webkit-appearance: none;
+            margin-bottom: 8px;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        select, input[type="color"], input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        select:focus, input[type="color"]:focus, input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+            min-width: 100px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #6c757d;
+            border: 2px solid #e9ecef;
+        }
+
+        .btn-secondary:hover {
+            background: #e9ecef;
+            transform: translateY(-1px);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+        }
+
+        .svg-container {
+            flex: 1;
+            border: 2px dashed #e1e8ed;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 400px;
+            background: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .svg-container.active {
+            border-color: #667eea;
+            background: linear-gradient(45deg, #f8f9fa 25%, transparent 25%), 
+                        linear-gradient(-45deg, #f8f9fa 25%, transparent 25%), 
+                        linear-gradient(45deg, transparent 75%, #f8f9fa 75%), 
+                        linear-gradient(-45deg, transparent 75%, #f8f9fa 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+        }
+
+        #animatedSVG {
+            max-width: 100%;
+            max-height: 100%;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+        }
+
+        .value-display {
+            font-size: 12px;
+            color: #667eea;
+            font-weight: 600;
+            text-align: right;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e1e8ed;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 16px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.1s ease;
+            border-radius: 4px;
+        }
+
+        .preset-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .preset-btn {
+            padding: 8px 12px;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .preset-btn:hover {
+            background: #e9ecef;
+            transform: translateY(-1px);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 12px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 8px;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 4px;
+        }
+
+        .tooltip {
+            position: relative;
+            cursor: help;
+        }
+
+        .tooltip::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2c3e50;
+            color: white;
+            padding: 6px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 1000;
+        }
+
+        .tooltip:hover::after {
+            opacity: 1;
+        }
+
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            
+            .control-panel {
+                position: static;
+            }
+        }
+
+        .export-section {
+            border-top: 1px solid #e1e8ed;
+            padding-top: 16px;
+            margin-top: 16px;
+        }
+
+        .code-output {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 12px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 120px;
+            overflow-y: auto;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="control-panel">
+            <h1>SVG Path Animator Pro</h1>
+            
+            <div class="section">
+                <h3>📝 SVG Path Input</h3>
+                <textarea id="pathInput" placeholder="Paste your SVG path data here... (e.g., M10,150 C10,150 70,10 150,150 C230,290 290,150 290,150)"></textarea>
+                <div class="preset-buttons">
+                    <button class="preset-btn" onclick="loadPreset('heart')">❤️ Heart</button>
+                    <button class="preset-btn" onclick="loadPreset('star')">⭐ Star</button>
+                    <button class="preset-btn" onclick="loadPreset('infinity')">∞ Infinity</button>
+                    <button class="preset-btn" onclick="loadPreset('wave')">🌊 Wave</button>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>⚡ Animation Controls</h3>
+                <div class="control-group">
+                    <label for="duration" class="tooltip" data-tooltip="Animation duration in seconds">Duration: <span id="durationValue" class="value-display">3s</span></label>
+                    <input type="range" id="duration" min="0.5" max="10" step="0.1" value="3">
+                </div>
+                
+                <div class="control-group">
+                    <label for="easing">Easing Function:</label>
+                    <select id="easing">
+                        <option value="linear">Linear</option>
+                        <option value="ease">Ease</option>
+                        <option value="ease-in">Ease In</option>
+                        <option value="ease-out">Ease Out</option>
+                        <option value="ease-in-out" selected>Ease In-Out</option>
+                        <option value="cubic-bezier(0.68, -0.55, 0.265, 1.55)">Bounce</option>
+                        <option value="cubic-bezier(0.25, 0.46, 0.45, 0.94)">Smooth</option>
+                        <option value="cubic-bezier(0.175, 0.885, 0.32, 1.275)">Spring</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="delay" class="tooltip" data-tooltip="Delay before animation starts">Delay: <span id="delayValue" class="value-display">0s</span></label>
+                    <input type="range" id="delay" min="0" max="3" step="0.1" value="0">
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-primary" onclick="startAnimation()">▶️ Play</button>
+                    <button class="btn-secondary" onclick="pauseAnimation()">⏸️ Pause</button>
+                    <button class="btn-danger" onclick="resetAnimation()">🔄 Reset</button>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>🎨 Stroke Styling</h3>
+                <div class="control-group">
+                    <label for="strokeColor">Stroke Color:</label>
+                    <input type="color" id="strokeColor" value="#667eea">
+                </div>
+                
+                <div class="control-group">
+                    <label for="strokeWidth" class="tooltip" data-tooltip="Thickness of the stroke line">Stroke Width: <span id="strokeWidthValue" class="value-display">3px</span></label>
+                    <input type="range" id="strokeWidth" min="1" max="20" value="3">
+                </div>
+
+                <div class="control-group">
+                    <label for="strokeDash">Dash Pattern:</label>
+                    <select id="strokeDash">
+                        <option value="">Solid</option>
+                        <option value="5,5">Dashed</option>
+                        <option value="10,5">Long Dash</option>
+                        <option value="2,3">Dotted</option>
+                        <option value="10,5,2,5">Dash-Dot</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="strokeCap">Line Cap:</label>
+                    <select id="strokeCap">
+                        <option value="round" selected>Round</option>
+                        <option value="square">Square</option>
+                        <option value="butt">Butt</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>📊 Animation Progress</h3>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="pathLength">0</div>
+                        <div class="stat-label">Path Length</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="currentProgress">0%</div>
+                        <div class="stat-label">Progress</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="timeRemaining">0s</div>
+                        <div class="stat-label">Time Left</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section export-section">
+                <h3>💾 Export & Code</h3>
+                <div class="button-group">
+                    <button class="btn-secondary" onclick="exportSVG()">📁 Export SVG</button>
+                    <button class="btn-secondary" onclick="copyCSS()">📋 Copy CSS</button>
+                </div>
+                <div class="code-output" id="codeOutput">
+                    Click "Copy CSS" to see the generated animation code
+                </div>
+            </div>
+        </div>
+
+        <div class="preview-area">
+            <div class="svg-container" id="svgContainer">
+                <p style="color: #6c757d; text-align: center;">
+                    Enter an SVG path to see the animation preview<br>
+                    <small>Try one of the preset examples to get started!</small>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentAnimation = null;
+        let isPaused = false;
+        let animationStartTime = 0;
+        let pausedTime = 0;
+
+        // Preset SVG paths
+        const presets = {
+            heart: "M12,21.35l-1.45-1.32C5.4,15.36,2,12.28,2,8.5 C2,5.42,4.42,3,7.5,3c1.74,0,3.41,0.81,4.5,2.09C13.09,3.81,14.76,3,16.5,3 C19.58,3,22,5.42,22,8.5c0,3.78-3.4,6.86-8.55,11.54L12,21.35z",
+            star: "M20.285 2l-11.285 11.567-5.286-5.011-3.714 3.716 9 8.728 15-15.285z",
+            infinity: "M9.828 12c0 1.38-1.12 2.5-2.5 2.5s-2.5-1.12-2.5-2.5 1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5zm9.172 0c0 1.38-1.12 2.5-2.5 2.5s-2.5-1.12-2.5-2.5 1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5z",
+            wave: "M2 12 Q 8 6, 14 12 T 26 12 Q 32 6, 38 12 T 50 12"
+        };
+
+        // Initialize UI elements
+        document.getElementById('duration').addEventListener('input', updateDurationDisplay);
+        document.getElementById('delay').addEventListener('input', updateDelayDisplay);
+        document.getElementById('strokeWidth').addEventListener('input', updateStrokeWidthDisplay);
+        document.getElementById('pathInput').addEventListener('input', debounce(updatePreview, 300));
+        
+        // Add event listeners for real-time updates
+        ['strokeColor', 'strokeDash', 'strokeCap'].forEach(id => {
+            document.getElementById(id).addEventListener('change', updatePreview);
+        });
+
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        function updateDurationDisplay() {
+            document.getElementById('durationValue').textContent = document.getElementById('duration').value + 's';
+        }
+
+        function updateDelayDisplay() {
+            document.getElementById('delayValue').textContent = document.getElementById('delay').value + 's';
+        }
+
+        function updateStrokeWidthDisplay() {
+            document.getElementById('strokeWidthValue').textContent = document.getElementById('strokeWidth').value + 'px';
+            updatePreview();
+        }
+
+        function loadPreset(type) {
+            document.getElementById('pathInput').value = presets[type];
+            updatePreview();
+        }
+
+        function updatePreview() {
+            const pathData = document.getElementById('pathInput').value.trim();
+            const container = document.getElementById('svgContainer');
+            
+            if (!pathData) {
+                container.innerHTML = `
+                    <p style="color: #6c757d; text-align: center;">
+                        Enter an SVG path to see the animation preview<br>
+                        <small>Try one of the preset examples to get started!</small>
+                    </p>
+                `;
+                container.classList.remove('active');
+                return;
+            }
+
+            container.classList.add('active');
+            
+            // Create SVG element
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.id = 'animatedSVG';
+            svg.setAttribute('viewBox', '0 0 300 200');
+            svg.setAttribute('width', '100%');
+            svg.setAttribute('height', '100%');
+            
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('d', pathData);
+            path.setAttribute('fill', 'none');
+            path.setAttribute('stroke', document.getElementById('strokeColor').value);
+            path.setAttribute('stroke-width', document.getElementById('strokeWidth').value);
+            path.setAttribute('stroke-linecap', document.getElementById('strokeCap').value);
+            
+            const dashPattern = document.getElementById('strokeDash').value;
+            if (dashPattern) {
+                path.setAttribute('stroke-dasharray', dashPattern);
+            }
+            
+            svg.appendChild(path);
+            container.innerHTML = '';
+            container.appendChild(svg);
+
+            // Calculate and display path length
+            try {
+                const pathLength = Math.round(path.getTotalLength());
+                document.getElementById('pathLength').textContent = pathLength;
+                
+                // Reset stroke-dasharray for animation
+                path.style.strokeDasharray = pathLength;
+                path.style.strokeDashoffset = pathLength;
+            } catch (e) {
+                console.warn('Could not calculate path length:', e);
+                document.getElementById('pathLength').textContent = 'N/A';
+            }
+        }
+
+        function startAnimation() {
+            const svg = document.getElementById('animatedSVG');
+            if (!svg) {
+                alert('Please enter a valid SVG path first!');
+                return;
+            }
+
+            const path = svg.querySelector('path');
+            const duration = parseFloat(document.getElementById('duration').value);
+            const delay = parseFloat(document.getElementById('delay').value);
+            const easing = document.getElementById('easing').value;
+
+            // Clear any existing animation
+            if (currentAnimation) {
+                currentAnimation.cancel();
+            }
+
+            try {
+                const pathLength = path.getTotalLength();
+                
+                // Set up initial state
+                path.style.strokeDasharray = pathLength;
+                path.style.strokeDashoffset = pathLength;
+                
+                // Create and start animation
+                currentAnimation = path.animate([
+                    { strokeDashoffset: pathLength },
+                    { strokeDashoffset: 0 }
+                ], {
+                    duration: duration * 1000,
+                    delay: delay * 1000,
+                    easing: easing,
+                    fill: 'forwards'
+                });
+
+                animationStartTime = Date.now() + (delay * 1000);
+                isPaused = false;
+                
+                // Update progress during animation
+                updateProgressLoop(duration);
+                
+                currentAnimation.addEventListener('finish', () => {
+                    document.getElementById('currentProgress').textContent = '100%';
+                    document.getElementById('timeRemaining').textContent = '0s';
+                    document.getElementById('progressFill').style.width = '100%';
+                });
+
+            } catch (e) {
+                alert('Error starting animation. Please check your SVG path.');
+                console.error(e);
+            }
+        }
+
+        function pauseAnimation() {
+            if (currentAnimation) {
+                if (isPaused) {
+                    currentAnimation.play();
+                    animationStartTime = Date.now() - pausedTime;
+                    isPaused = false;
+                    document.querySelector('.btn-secondary').innerHTML = '⏸️ Pause';
+                } else {
+                    currentAnimation.pause();
+                    pausedTime = Date.now() - animationStartTime;
+                    isPaused = true;
+                    document.querySelector('.btn-secondary').innerHTML = '▶️ Resume';
+                }
+            }
+        }
+
+        function resetAnimation() {
+            if (currentAnimation) {
+                currentAnimation.cancel();
+                currentAnimation = null;
+            }
+            
+            const svg = document.getElementById('animatedSVG');
+            if (svg) {
+                const path = svg.querySelector('path');
+                try {
+                    const pathLength = path.getTotalLength();
+                    path.style.strokeDashoffset = pathLength;
+                } catch (e) {
+                    console.warn('Could not reset path');
+                }
+            }
+            
+            document.getElementById('currentProgress').textContent = '0%';
+            document.getElementById('timeRemaining').textContent = '0s';
+            document.getElementById('progressFill').style.width = '0%';
+            document.querySelector('.btn-secondary').innerHTML = '⏸️ Pause';
+            isPaused = false;
+        }
+
+        function updateProgressLoop(totalDuration) {
+            if (!currentAnimation || currentAnimation.playState === 'finished') return;
+            
+            const now = Date.now();
+            const elapsed = Math.max(0, now - animationStartTime) / 1000;
+            const progress = Math.min(100, (elapsed / totalDuration) * 100);
+            const remaining = Math.max(0, totalDuration - elapsed);
+            
+            document.getElementById('currentProgress').textContent = Math.round(progress) + '%';
+            document.getElementById('timeRemaining').textContent = remaining.toFixed(1) + 's';
+            document.getElementById('progressFill').style.width = progress + '%';
+            
+            if (progress < 100 && !isPaused) {
+                requestAnimationFrame(() => updateProgressLoop(totalDuration));
+            }
+        }
+
+        function exportSVG() {
+            const svg = document.getElementById('animatedSVG');
+            if (!svg) {
+                alert('No SVG to export. Please create an animation first.');
+                return;
+            }
+            
+            const svgData = new XMLSerializer().serializeToString(svg);
+            const blob = new Blob([svgData], { type: 'image/svg+xml' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'animated-path.svg';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function copyCSS() {
+            const pathData = document.getElementById('pathInput').value.trim();
+            const duration = document.getElementById('duration').value;
+            const delay = document.getElementById('delay').value;
+            const easing = document.getElementById('easing').value;
+            const strokeColor = document.getElementById('strokeColor').value;
+            const strokeWidth = document.getElementById('strokeWidth').value;
+            const strokeCap = document.getElementById('strokeCap').value;
+            const strokeDash = document.getElementById('strokeDash').value;
+            
+            if (!pathData) {
+                alert('Please enter an SVG path first.');
+                return;
+            }
+
+            const css = `/* SVG Path Animation CSS */
+.animated-path {
+    fill: none;
+    stroke: ${strokeColor};
+    stroke-width: ${strokeWidth}px;
+    stroke-linecap: ${strokeCap};${strokeDash ? `\n    stroke-dasharray: ${strokeDash};` : ''}
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+    animation: draw-path ${duration}s ${easing} ${delay}s forwards;
+}
+
+@keyframes draw-path {
+    to { stroke-dashoffset: 0; }
+}
+
+/* HTML Structure */
+<svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+    <path d="${pathData}" class="animated-path"/>
+</svg>`;
+            
+            navigator.clipboard.writeText(css).then(() => {
+                document.getElementById('codeOutput').textContent = css;
+                alert('CSS code copied to clipboard!');
+            }).catch(() => {
+                document.getElementById('codeOutput').textContent = css;
+                alert('CSS code generated! (Copy manually if clipboard access failed)');
+            });
+        }
+
+        // Initialize displays
+        updateDurationDisplay();
+        updateDelayDisplay();
+        updateStrokeWidthDisplay();
+        
+        // Load a default preset
+        setTimeout(() => {
+            loadPreset('wave');
+        }, 500);
+    </script>
+</body>
+</html>
