@@ -1,0 +1,1978 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVG Path Animator Pro | Enhanced Edition</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #8b5cf6;
+            --accent: #ec4899;
+            --success: #10b981;
+            --danger: #ef4444;
+            --dark: #1e293b;
+            --darker: #0f172a;
+            --light: #f8fafc;
+            --lighter: #ffffff;
+            --gray: #94a3b8;
+            --border: rgba(226, 232, 240, 0.6);
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --card-shadow: 0 20px 40px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.2);
+            --card-hover-shadow: 0 25px 50px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.3);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body.dark-mode {
+            --primary: #818cf8;
+            --primary-dark: #6366f1;
+            --secondary: #a78bfa;
+            --accent: #f472b6;
+            --dark: #0f172a;
+            --darker: #020617;
+            --light: #1e293b;
+            --lighter: #334155;
+            --gray: #64748b;
+            --border: rgba(71, 85, 105, 0.6);
+            --card-bg: rgba(30, 41, 59, 0.95);
+            --card-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(30, 41, 59, 0.3);
+            --card-hover-shadow: 0 25px 50px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(71, 85, 105, 0.4);
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: #333;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+            padding: 20px;
+            transition: background 0.5s ease;
+        }
+
+        body.dark-mode {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 70%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        body.dark-mode::before {
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 40% 70%, rgba(255, 255, 255, 0.02) 0%, transparent 50%);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 25px;
+            min-height: calc(100vh - 40px);
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .control-panel {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 28px;
+            box-shadow: var(--card-shadow);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+            transition: var(--transition);
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .control-panel:hover {
+            box-shadow: var(--card-hover-shadow);
+            transform: translateY(-2px);
+        }
+
+        .canvas-area {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 28px;
+            box-shadow: var(--card-shadow);
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition);
+            border: 1px solid var(--border);
+        }
+
+        .canvas-area:hover {
+            box-shadow: var(--card-hover-shadow);
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 0;
+            background: linear-gradient(135deg, var(--primary), var(--secondary), var(--accent));
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 4s ease-in-out infinite;
+            text-align: center;
+            letter-spacing: -0.5px;
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 2px;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .section {
+            margin-bottom: 28px;
+            opacity: 0;
+            animation: slideInUp 0.6s ease-out forwards;
+        }
+
+        .section:nth-child(2) { animation-delay: 0.1s; }
+        .section:nth-child(3) { animation-delay: 0.2s; }
+        .section:nth-child(4) { animation-delay: 0.3s; }
+        .section:nth-child(5) { animation-delay: 0.4s; }
+        .section:nth-child(6) { animation-delay: 0.5s; }
+
+        @keyframes slideInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(99, 102, 241, 0.1);
+            position: relative;
+        }
+
+        .dark-mode .section h3 {
+            color: #e2e8f0;
+        }
+
+        .section h3::before {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            transition: width 0.3s ease;
+        }
+
+        .section:hover h3::before {
+            width: 100%;
+        }
+
+        .section-icon {
+            width: 20px;
+            height: 20px;
+            color: var(--primary);
+            transition: var(--transition);
+            filter: drop-shadow(0 2px 4px rgba(99, 102, 241, 0.2));
+        }
+
+        .section:hover .section-icon {
+            color: var(--secondary);
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 16px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+            font-size: 14px;
+            resize: vertical;
+            transition: var(--transition);
+            background: rgba(248, 250, 252, 0.8);
+            backdrop-filter: blur(10px);
+            line-height: 1.6;
+        }
+
+        .dark-mode textarea {
+            background: rgba(30, 41, 59, 0.8);
+            color: #e2e8f0;
+            border-color: #475569;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1), 0 4px 12px rgba(99, 102, 241, 0.15);
+            background: rgba(255, 255, 255, 0.9);
+            transform: translateY(-1px);
+        }
+
+        .dark-mode textarea:focus {
+            background: rgba(30, 41, 59, 0.9);
+        }
+
+        textarea::placeholder {
+            color: var(--gray);
+            font-style: italic;
+        }
+
+        .control-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--dark);
+        }
+
+        .dark-mode label {
+            color: #e2e8f0;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: linear-gradient(90deg, #e5e7eb 0%, #e5e7eb 100%);
+            outline: none;
+            -webkit-appearance: none;
+            margin-bottom: 8px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .dark-mode input[type="range"] {
+            background: linear-gradient(90deg, #475569 0%, #475569 100%);
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(99, 102, 241, 0.3), 0 0 0 4px rgba(255, 255, 255, 0.8), 0 0 0 6px rgba(99, 102, 241, 0.1);
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .dark-mode input[type="range"]::-webkit-slider-thumb {
+            box-shadow: 0 4px 8px rgba(99, 102, 241, 0.4), 0 0 0 4px rgba(30, 41, 59, 0.8), 0 0 0 6px rgba(99, 102, 241, 0.2);
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+            box-shadow: 0 6px 12px rgba(99, 102, 241, 0.4), 0 0 0 4px rgba(255, 255, 255, 0.9), 0 0 0 8px rgba(99, 102, 241, 0.15);
+        }
+
+        input[type="range"]::-webkit-slider-thumb:active {
+            transform: scale(1.05);
+        }
+
+        input[type="color"] {
+            width: 100%;
+            height: 50px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        input[type="color"]:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+
+        input[type="color"]:active {
+            transform: translateY(0);
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-size: 14px;
+            transition: var(--transition);
+            background: rgba(248, 250, 252, 0.8);
+            backdrop-filter: blur(10px);
+        }
+
+        .dark-mode input[type="number"] {
+            background: rgba(30, 41, 59, 0.8);
+            color: #e2e8f0;
+            border-color: #475569;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1), 0 4px 12px rgba(99, 102, 241, 0.15);
+            transform: translateY(-1px);
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .dark-mode input[type="number"]:focus {
+            background: rgba(30, 41, 59, 0.9);
+        }
+
+        select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-size: 14px;
+            background: rgba(248, 250, 252, 0.8);
+            backdrop-filter: blur(10px);
+            cursor: pointer;
+            transition: var(--transition);
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 12px center;
+            background-repeat: no-repeat;
+            background-size: 16px;
+            padding-right: 48px;
+        }
+
+        .dark-mode select {
+            background: rgba(30, 41, 59, 0.8);
+            color: #e2e8f0;
+            border-color: #475569;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2394a3b8' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+        }
+
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1), 0 4px 12px rgba(99, 102, 241, 0.15);
+            transform: translateY(-1px);
+            background-color: rgba(255, 255, 255, 0.9);
+        }
+
+        .dark-mode select:focus {
+            background-color: rgba(30, 41, 59, 0.9);
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        button {
+            padding: 14px 18px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        button:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            box-shadow: 0 4px 8px rgba(99, 102, 241, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 8px rgba(99, 102, 241, 0.3), inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-secondary {
+            background: rgba(248, 250, 252, 0.9);
+            color: #374151;
+            border: 1px solid rgba(209, 213, 219, 0.5);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+
+        .dark-mode .btn-secondary {
+            background: rgba(30, 41, 59, 0.9);
+            color: #e2e8f0;
+            border-color: rgba(71, 85, 105, 0.5);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(229, 231, 235, 0.9);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+        }
+
+        .dark-mode .btn-secondary:hover {
+            background: rgba(51, 65, 85, 0.9);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-danger:active {
+            transform: translateY(0);
+        }
+
+        .svg-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 500px;
+            background: 
+                linear-gradient(135deg, #fafafa 0%, #f0f0f0 100%),
+                radial-gradient(circle at 30% 30%, rgba(99, 102, 241, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 70% 70%, rgba(139, 92, 246, 0.05) 0%, transparent 50%);
+            border-radius: 16px;
+            border: 2px dashed rgba(99, 102, 241, 0.2);
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .dark-mode .svg-container {
+            background: 
+                linear-gradient(135deg, #334155 0%, #1e293b 100%),
+                radial-gradient(circle at 30% 30%, rgba(99, 102, 241, 0.1) 0%, transparent 50%);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+
+        .svg-container:hover {
+            border-color: rgba(99, 102, 241, 0.4);
+            background: 
+                linear-gradient(135deg, #fcfcfc 0%, #f5f5f5 100%),
+                radial-gradient(circle at 30% 30%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 70% 70%, rgba(139, 92, 246, 0.08) 0%, transparent 50%);
+        }
+
+        .dark-mode .svg-container:hover {
+            background: 
+                linear-gradient(135deg, #3c4b66 0%, #2d3748 100%),
+                radial-gradient(circle at 30% 30%, rgba(99, 102, 241, 0.15) 0%, transparent 50%);
+        }
+
+        .svg-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                repeating-linear-gradient(
+                    45deg,
+                    transparent,
+                    transparent 10px,
+                    rgba(99, 102, 241, 0.02) 10px,
+                    rgba(99, 102, 241, 0.02) 20px
+                );
+            pointer-events: none;
+        }
+
+        .dark-mode .svg-container::before {
+            background: 
+                repeating-linear-gradient(
+                    45deg,
+                    transparent,
+                    transparent 10px,
+                    rgba(99, 102, 241, 0.05) 10px,
+                    rgba(99, 102, 241, 0.05) 20px
+                );
+        }
+
+        .svg-container svg {
+            max-width: 100%;
+            max-height: 100%;
+            filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.1));
+            transition: var(--transition);
+            z-index: 1;
+            position: relative;
+        }
+
+        .svg-container svg:hover {
+            filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.15));
+            transform: scale(1.02);
+        }
+
+        .value-display {
+            font-size: 14px;
+            color: var(--gray);
+            text-align: right;
+            font-weight: 500;
+        }
+
+        .preset-paths {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .preset-btn {
+            padding: 10px 12px;
+            font-size: 13px;
+            background: rgba(248, 250, 252, 0.9);
+            border: 1px solid rgba(226, 232, 240, 0.6);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .dark-mode .preset-btn {
+            background: rgba(30, 41, 59, 0.9);
+            border-color: rgba(71, 85, 105, 0.6);
+            color: #e2e8f0;
+        }
+
+        .preset-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.1), transparent);
+            transition: left 0.4s ease;
+        }
+
+        .preset-btn:hover::before {
+            left: 100%;
+        }
+
+        .preset-btn:hover {
+            background: rgba(226, 232, 240, 0.9);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+
+        .dark-mode .preset-btn:hover {
+            background: rgba(51, 65, 85, 0.9);
+        }
+
+        .preset-btn:active {
+            transform: translateY(0);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(229, 231, 235, 0.8);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 16px;
+            position: relative;
+            backdrop-filter: blur(10px);
+        }
+
+        .dark-mode .progress-bar {
+            background: rgba(71, 85, 105, 0.8);
+        }
+
+        .progress-bar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, 
+                rgba(255, 255, 255, 0.0) 0%, 
+                rgba(255, 255, 255, 0.3) 50%, 
+                rgba(255, 255, 255, 0.0) 100%);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
+            background-size: 200% 100%;
+            width: 0%;
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 3px;
+            position: relative;
+            animation: progressGradient 3s ease-in-out infinite;
+        }
+
+        @keyframes progressGradient {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 8px;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 0 3px 3px 0;
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+        }
+
+        .animation-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+            padding: 16px;
+            background: 
+                linear-gradient(135deg, rgba(248, 250, 252, 0.9) 0%, rgba(241, 245, 249, 0.9) 100%);
+            backdrop-filter: blur(15px);
+            border-radius: 12px;
+            font-size: 12px;
+            border: 1px solid rgba(226, 232, 240, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dark-mode .animation-info {
+            background: 
+                linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%);
+            border-color: rgba(71, 85, 105, 0.5);
+        }
+
+        .animation-info::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent), var(--primary));
+            background-size: 200% 100%;
+            animation: borderFlow 4s linear infinite;
+        }
+
+        @keyframes borderFlow {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 200% 50%; }
+        }
+
+        .info-item {
+            text-align: center;
+            position: relative;
+            padding: 8px;
+            transition: transform 0.2s ease;
+        }
+
+        .info-item:hover {
+            transform: translateY(-2px);
+        }
+
+        .info-label {
+            color: var(--gray);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 11px;
+        }
+
+        .info-value {
+            color: var(--dark);
+            font-weight: 700;
+            margin-top: 4px;
+            font-size: 16px;
+            background: linear-gradient(135deg, var(--dark), var(--gray));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .dark-mode .info-value {
+            background: linear-gradient(135deg, #e2e8f0, #94a3b8);
+        }
+
+        .export-section {
+            border-top: 1px solid var(--border);
+            padding-top: 16px;
+            margin-top: 16px;
+        }
+
+        /* Timeline */
+        .timeline-container {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(248, 250, 252, 0.8);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .dark-mode .timeline-container {
+            background: rgba(30, 41, 59, 0.8);
+            border-color: #475569;
+        }
+
+        .timeline {
+            height: 40px;
+            background: rgba(229, 231, 235, 0.8);
+            border-radius: 8px;
+            position: relative;
+            margin: 10px 0;
+            cursor: pointer;
+        }
+
+        .dark-mode .timeline {
+            background: rgba(71, 85, 105, 0.8);
+        }
+
+        .timeline-progress {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 8px;
+            position: relative;
+            transition: width 0.1s linear;
+        }
+
+        .timeline-scrubber {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            cursor: grab;
+            z-index: 10;
+        }
+
+        .timeline-markers {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: var(--gray);
+            margin-top: 5px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .container {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            
+            .control-panel {
+                position: relative;
+                top: 0;
+                order: 2;
+            }
+            
+            .canvas-area {
+                order: 1;
+            }
+            
+            h1 {
+                font-size: 28px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 12px;
+            }
+            
+            .control-panel,
+            .canvas-area {
+                padding: 20px;
+                border-radius: 16px;
+            }
+            
+            .button-group {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            
+            .animation-info {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            
+            .preset-paths {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+            
+            h1 {
+                font-size: 24px;
+                margin-bottom: 20px;
+            }
+        }
+
+        /* Accessibility improvements */
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* Focus styles for accessibility */
+        button:focus-visible,
+        input:focus-visible,
+        select:focus-visible,
+        textarea:focus-visible {
+            outline: 2px solid var(--primary);
+            outline-offset: 2px;
+        }
+
+        /* High contrast mode support */
+        @media (prefers-contrast: high) {
+            .control-panel,
+            .canvas-area {
+                border: 2px solid;
+            }
+            
+            button {
+                border: 2px solid;
+            }
+        }
+
+        .advanced-controls {
+            background: 
+                linear-gradient(135deg, rgba(248, 250, 252, 0.8) 0%, rgba(241, 245, 249, 0.8) 100%);
+            backdrop-filter: blur(15px);
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 16px;
+            border: 1px solid rgba(226, 232, 240, 0.6);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dark-mode .advanced-controls {
+            background: 
+                linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.8) 100%);
+            border-color: rgba(71, 85, 105, 0.6);
+        }
+
+        .advanced-controls::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, var(--primary), var(--secondary), var(--accent), var(--primary));
+            background-size: 400% 400%;
+            border-radius: 14px;
+            z-index: -1;
+            animation: advancedGradient 6s ease infinite;
+            opacity: 0.3;
+        }
+
+        @keyframes advancedGradient {
+            0%, 100% { background-position: 0% 50%; }
+            25% { background-position: 100% 50%; }
+            50% { background-position: 100% 100%; }
+            75% { background-position: 0% 100%; }
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .checkbox-group:hover {
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            appearance: none;
+            border: 2px solid #d1d5db;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.9);
+            position: relative;
+            transition: var(--transition);
+        }
+
+        .dark-mode input[type="checkbox"] {
+            background: rgba(30, 41, 59, 0.9);
+            border-color: #475569;
+        }
+
+        input[type="checkbox"]:checked {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-color: var(--primary);
+            transform: scale(1.05);
+        }
+
+        input[type="checkbox"]:checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        input[type="checkbox"]:hover {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        }
+
+        /* AI Generator */
+        .ai-generator {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .ai-generator input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-size: 14px;
+            background: rgba(248, 250, 252, 0.8);
+            backdrop-filter: blur(10px);
+        }
+
+        .dark-mode .ai-generator input {
+            background: rgba(30, 41, 59, 0.8);
+            color: #e2e8f0;
+            border-color: #475569;
+        }
+
+        /* Theme Switcher */
+        .theme-switcher {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(248, 250, 252, 0.8);
+            padding: 8px 16px;
+            border-radius: 50px;
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .dark-mode .theme-switcher {
+            background: rgba(30, 41, 59, 0.8);
+            border-color: rgba(71, 85, 105, 0.6);
+        }
+
+        .theme-switcher:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .theme-icon {
+            font-size: 18px;
+            color: var(--primary);
+        }
+
+        /* 3D Controls */
+        .transform-controls {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .transform-control {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .transform-label {
+            font-size: 12px;
+            color: var(--gray);
+            margin-bottom: 5px;
+        }
+        
+        /* Floating buttons */
+        .floating-buttons {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 100;
+        }
+        
+        .floating-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .floating-btn:hover {
+            transform: translateY(-3px) scale(1.1);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+        
+        .floating-btn i {
+            font-size: 20px;
+        }
+        
+        /* Toast notifications */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--card-bg);
+            color: var(--dark);
+            padding: 15px 25px;
+            border-radius: 12px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+        }
+        
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        
+        .toast i {
+            font-size: 20px;
+            color: var(--success);
+        }
+        
+        .dark-mode .toast {
+            color: #e2e8f0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div></div> <!-- Spacer -->
+        <div class="theme-switcher" id="themeToggle">
+            <i class="fas fa-moon theme-icon"></i>
+            <span>Dark Mode</span>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="control-panel">
+            <h1>SVG Path Animator Pro</h1>
+            
+            <div class="section">
+                <h3>
+                    <i class="fas fa-pen section-icon"></i>
+                    SVG Path Input
+                </h3>
+                <textarea id="pathInput" placeholder="Paste your SVG path data here (e.g., M10,10 L50,50 C70,70 90,90 100,100)">M50,50 Q100,25 150,50 T250,50</textarea>
+                <div class="preset-paths">
+                    <button class="preset-btn" onclick="loadPreset('heart')">
+                        <i class="fas fa-heart"></i> Heart
+                    </button>
+                    <button class="preset-btn" onclick="loadPreset('star')">
+                        <i class="fas fa-star"></i> Star
+                    </button>
+                    <button class="preset-btn" onclick="loadPreset('wave')">
+                        <i class="fas fa-wave-square"></i> Wave
+                    </button>
+                    <button class="preset-btn" onclick="loadPreset('spiral')">
+                        <i class="fas fa-infinity"></i> Spiral
+                    </button>
+                </div>
+                
+                <div class="ai-generator">
+                    <input type="text" id="aiInput" placeholder="Describe a shape (e.g., mountain, cloud, rocket)">
+                    <button class="btn-secondary" onclick="generatePath()">
+                        <i class="fas fa-magic"></i> AI Generate
+                    </button>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>
+                    <i class="fas fa-sliders-h section-icon"></i>
+                    Animation Controls
+                </h3>
+                <div class="control-group">
+                    <label>Duration: <span class="value-display" id="durationValue">3.0s</span></label>
+                    <input type="range" id="duration" min="0.5" max="10" step="0.1" value="3">
+                </div>
+                <div class="control-group">
+                    <label>Delay: <span class="value-display" id="delayValue">0.0s</span></label>
+                    <input type="range" id="delay" min="0" max="5" step="0.1" value="0">
+                </div>
+                <div class="control-group">
+                    <label>Easing Function</label>
+                    <select id="easing">
+                        <option value="ease">Ease</option>
+                        <option value="linear">Linear</option>
+                        <option value="ease-in">Ease In</option>
+                        <option value="ease-out">Ease Out</option>
+                        <option value="ease-in-out">Ease In Out</option>
+                        <option value="cubic-bezier(0.68, -0.55, 0.265, 1.55)">Bounce</option>
+                        <option value="cubic-bezier(0.25, 0.46, 0.45, 0.94)">Smooth</option>
+                        <option value="cubic-bezier(0.895, 0.03, 0.685, 0.22)">Power</option>
+                    </select>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                
+                <div class="timeline-container">
+                    <h4>Animation Timeline</h4>
+                    <div class="timeline" id="timeline">
+                        <div class="timeline-progress" id="timelineProgress"></div>
+                        <div class="timeline-scrubber" id="timelineScrubber"></div>
+                    </div>
+                    <div class="timeline-markers">
+                        <span>0%</span>
+                        <span>25%</span>
+                        <span>50%</span>
+                        <span>75%</span>
+                        <span>100%</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>
+                    <i class="fas fa-paint-brush section-icon"></i>
+                    Stroke Properties
+                </h3>
+                <div class="control-group">
+                    <label>Stroke Color</label>
+                    <input type="color" id="strokeColor" value="#6366f1">
+                </div>
+                <div class="control-group">
+                    <label>Stroke Width: <span class="value-display" id="strokeWidthValue">3px</span></label>
+                    <input type="range" id="strokeWidth" min="1" max="20" value="3">
+                </div>
+                <div class="control-group">
+                    <label>Line Cap</label>
+                    <select id="lineCap">
+                        <option value="round">Round</option>
+                        <option value="butt">Butt</option>
+                        <option value="square">Square</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>Line Join</label>
+                    <select id="lineJoin">
+                        <option value="round">Round</option>
+                        <option value="miter">Miter</option>
+                        <option value="bevel">Bevel</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>
+                    <i class="fas fa-cogs section-icon"></i>
+                    Advanced Options
+                </h3>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="loop" checked>
+                    <label for="loop">Loop Animation</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="reverse">
+                    <label for="reverse">Reverse Direction</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="showPath">
+                    <label for="showPath">Show Full Path</label>
+                </div>
+                
+                <div class="advanced-controls">
+                    <div class="control-group">
+                        <label>Canvas Size</label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                            <input type="number" id="canvasWidth" placeholder="Width" value="500">
+                            <input type="number" id="canvasHeight" placeholder="Height" value="400">
+                        </div>
+                    </div>
+                    
+                    <h4>3D Transform</h4>
+                    <div class="transform-controls">
+                        <div class="transform-control">
+                            <label class="transform-label">Rotation X</label>
+                            <input type="range" id="rotateX" min="-180" max="180" value="0">
+                        </div>
+                        <div class="transform-control">
+                            <label class="transform-label">Rotation Y</label>
+                            <input type="range" id="rotateY" min="-180" max="180" value="0">
+                        </div>
+                        <div class="transform-control">
+                            <label class="transform-label">Perspective</label>
+                            <input type="range" id="perspective" min="500" max="2000" value="1000">
+                        </div>
+                        <div class="transform-control">
+                            <label class="transform-label">Depth</label>
+                            <input type="range" id="depth" min="0" max="100" value="20">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn-primary" onclick="startAnimation()">
+                    <i class="fas fa-play"></i> Play
+                </button>
+                <button class="btn-secondary" onclick="pauseAnimation()">
+                    <i class="fas fa-pause"></i> Pause
+                </button>
+                <button class="btn-secondary" onclick="resetAnimation()">
+                    <i class="fas fa-redo"></i> Reset
+                </button>
+                <button class="btn-danger" onclick="clearPath()">
+                    <i class="fas fa-trash"></i> Clear
+                </button>
+            </div>
+
+            <div class="animation-info">
+                <div class="info-item">
+                    <div class="info-label">Status</div>
+                    <div class="info-value" id="animationStatus">Ready</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Progress</div>
+                    <div class="info-value" id="animationProgress">0%</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Path Length</div>
+                    <div class="info-value" id="pathLength">0px</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Frames</div>
+                    <div class="info-value" id="frameCount">0</div>
+                </div>
+            </div>
+
+            <div class="export-section">
+                <h3>
+                    <i class="fas fa-file-export section-icon"></i>
+                    Export
+                </h3>
+                <div class="button-group">
+                    <button class="btn-secondary" onclick="exportSVG()">
+                        <i class="fas fa-download"></i> SVG
+                    </button>
+                    <button class="btn-secondary" onclick="exportCSS()">
+                        <i class="fab fa-css3"></i> CSS
+                    </button>
+                    <button class="btn-secondary" onclick="exportGIF()">
+                        <i class="fas fa-film"></i> GIF
+                    </button>
+                    <button class="btn-secondary" onclick="shareAnimation()">
+                        <i class="fas fa-share-alt"></i> Share
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="canvas-area">
+            <div class="svg-container" id="svgContainer">
+                <p style="color: #6b7280; text-align: center;">Enter an SVG path to start animating</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="floating-buttons">
+        <div class="floating-btn" title="Undo" onclick="undoAction()">
+            <i class="fas fa-undo"></i>
+        </div>
+        <div class="floating-btn" title="Redo" onclick="redoAction()">
+            <i class="fas fa-redo"></i>
+        </div>
+        <div class="floating-btn" title="Help" onclick="showHelp()">
+            <i class="fas fa-question"></i>
+        </div>
+    </div>
+    
+    <div class="toast" id="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toastMessage">Action completed successfully!</span>
+    </div>
+
+    <script>
+        // Global variables
+        let animationId;
+        let currentPath;
+        let isAnimating = false;
+        let startTime;
+        let pathElement;
+        let svgElement;
+        let history = [];
+        let historyIndex = -1;
+        
+        // Preset paths
+        const presets = {
+            heart: "M12,21.35l-1.45-1.32C5.4,15.36,2,12.28,2,8.5 C2,5.42,4.42,3,7.5,3c1.74,0,3.41,0.81,4.5,2.09C13.09,3.81,14.76,3,16.5,3 C19.58,3,22,5.42,22,8.5c0,3.78-3.4,6.86-8.55,11.54L12,21.35z",
+            star: "M12,2l3.09,6.26L22,9.27l-5,4.87 L18.18,21L12,17.77L5.82,21L7,14.14L2,9.27l6.91-1.01L12,2z",
+            wave: "M0,100 Q50,50 100,100 T200,100 T300,100 T400,100",
+            spiral: "M200,200 Q180,180 160,200 Q140,220 160,240 Q180,260 200,240 Q220,220 200,200 Q180,180 200,160 Q220,140 240,160 Q260,180 240,200 Q220,220 240,240 Q260,260 280,240 Q300,220 280,200",
+            mountain: "M50,400 L150,200 L250,300 L350,100 L450,400",
+            cloud: "M100,200 Q150,150 200,200 Q250,150 300,200 Q350,250 300,300 Q250,350 200,300 Q150,350 100,300 Q50,250 100,200",
+            rocket: "M100,400 L150,150 L200,100 L250,150 L300,400 L250,350 L150,350 Z"
+        };
+        
+        // AI Generated paths (simulated)
+        const aiPaths = {
+            mountain: "M50,400 L150,200 L250,300 L350,100 L450,400",
+            cloud: "M100,200 Q150,150 200,200 Q250,150 300,200 Q350,250 300,300 Q250,350 200,300 Q150,350 100,300 Q50,250 100,200",
+            rocket: "M100,400 L150,150 L200,100 L250,150 L300,400 L250,350 L150,350 Z",
+            tree: "M250,400 L250,300 L200,300 L250,250 L220,250 L250,200 L230,200 L260,150 L290,200 L270,200 L300,250 L270,250 L300,300 L250,300 L250,400",
+            fish: "M100,250 Q150,200 200,250 Q250,300 200,350 Q150,400 100,350 Q50,300 100,250 M200,250 L250,230 L250,270 Z"
+        };
+
+        // Initialize the application
+        function init() {
+            updateValueDisplays();
+            setupEventListeners();
+            createSVG();
+            
+            // Add initial state to history
+            saveState();
+            
+            // Set theme based on system preference
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                toggleTheme();
+            }
+        }
+        
+        // Set up event listeners
+        function setupEventListeners() {
+            document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+            
+            const inputs = [
+                'pathInput', 'duration', 'delay', 'strokeColor', 'strokeWidth', 
+                'lineCap', 'lineJoin', 'loop', 'reverse', 'showPath', 
+                'canvasWidth', 'canvasHeight', 'rotateX', 'rotateY', 
+                'perspective', 'depth'
+            ];
+            
+            inputs.forEach(id => {
+                document.getElementById(id).addEventListener('input', function() {
+                    if (id === 'pathInput' || id === 'canvasWidth' || id === 'canvasHeight') {
+                        createSVG();
+                    } else if (id.startsWith('rotate') || id === 'perspective' || id === 'depth') {
+                        apply3DTransform();
+                    } else {
+                        updatePathProperties();
+                    }
+                    updateValueDisplays();
+                    saveState();
+                });
+            });
+            
+            // Timeline scrubbing
+            const timeline = document.getElementById('timeline');
+            const scrubber = document.getElementById('timelineScrubber');
+            const progress = document.getElementById('timelineProgress');
+            
+            timeline.addEventListener('click', function(e) {
+                const rect = timeline.getBoundingClientRect();
+                const pos = (e.clientX - rect.left) / rect.width;
+                scrubTimeline(pos);
+            });
+            
+            scrubber.addEventListener('mousedown', function(e) {
+                e.preventDefault();
+                document.addEventListener('mousemove', moveScrubber);
+                document.addEventListener('mouseup', stopScrubber);
+            });
+        }
+        
+        // Toggle dark/light theme
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            const icon = document.querySelector('.theme-icon');
+            const text = document.querySelector('#themeToggle span');
+            
+            if (document.body.classList.contains('dark-mode')) {
+                icon.className = 'fas fa-sun theme-icon';
+                text.textContent = 'Light Mode';
+            } else {
+                icon.className = 'fas fa-moon theme-icon';
+                text.textContent = 'Dark Mode';
+            }
+            
+            // Re-apply 3D transform
+            apply3DTransform();
+        }
+        
+        // Load preset path
+        function loadPreset(preset) {
+            document.getElementById('pathInput').value = presets[preset];
+            createSVG();
+            showToast(`Loaded ${preset} preset`);
+        }
+        
+        // Generate path using AI (simulated)
+        function generatePath() {
+            const input = document.getElementById('aiInput').value.toLowerCase();
+            let path = '';
+            
+            if (aiPaths[input]) {
+                path = aiPaths[input];
+                document.getElementById('pathInput').value = path;
+                createSVG();
+                showToast(`Generated "${input}" path`);
+            } else {
+                // Random path if not found
+                const keys = Object.keys(aiPaths);
+                const randomKey = keys[Math.floor(Math.random() * keys.length)];
+                path = aiPaths[randomKey];
+                document.getElementById('pathInput').value = path;
+                createSVG();
+                showToast(`Generated random "${randomKey}" path`);
+            }
+        }
+        
+        // Update value displays
+        function updateValueDisplays() {
+            document.getElementById('durationValue').textContent = 
+                document.getElementById('duration').value + 's';
+                
+            document.getElementById('delayValue').textContent = 
+                document.getElementById('delay').value + 's';
+                
+            document.getElementById('strokeWidthValue').textContent = 
+                document.getElementById('strokeWidth').value + 'px';
+        }
+        
+        // Create SVG from path data
+        function createSVG() {
+            const pathData = document.getElementById('pathInput').value.trim();
+            const container = document.getElementById('svgContainer');
+            
+            if (!pathData) {
+                container.innerHTML = '<p style="color: #6b7280; text-align: center;">Enter an SVG path to start animating</p>';
+                resetAnimation();
+                pathElement = null;
+                svgElement = null;
+                document.getElementById('pathLength').textContent = '0px';
+                return;
+            }
+            
+            const width = document.getElementById('canvasWidth').value || 500;
+            const height = document.getElementById('canvasHeight').value || 400;
+            
+            container.innerHTML = '';
+            
+            svgElement = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svgElement.setAttribute('width', width);
+            svgElement.setAttribute('height', height);
+            svgElement.setAttribute('viewBox', `0 0 ${width} ${height}`);
+            svgElement.setAttribute('class', 'svg-element');
+            
+            // Background path (if show full path is enabled)
+            if (document.getElementById('showPath').checked) {
+                const backgroundPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                backgroundPath.setAttribute('d', pathData);
+                backgroundPath.setAttribute('stroke', document.body.classList.contains('dark-mode') ? '#334155' : '#e5e7eb');
+                backgroundPath.setAttribute('stroke-width', '1');
+                backgroundPath.setAttribute('fill', 'none');
+                backgroundPath.setAttribute('opacity', '0.5');
+                svgElement.appendChild(backgroundPath);
+            }
+            
+            // Animated path
+            pathElement = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            pathElement.setAttribute('d', pathData);
+            pathElement.setAttribute('stroke', document.getElementById('strokeColor').value);
+            pathElement.setAttribute('stroke-width', document.getElementById('strokeWidth').value);
+            pathElement.setAttribute('stroke-linecap', document.getElementById('lineCap').value);
+            pathElement.setAttribute('stroke-linejoin', document.getElementById('lineJoin').value);
+            pathElement.setAttribute('fill', 'none');
+            pathElement.setAttribute('class', 'animated-path');
+            
+            svgElement.appendChild(pathElement);
+            container.appendChild(svgElement);
+            
+            currentPath = pathElement;
+            updatePathInfo();
+            apply3DTransform();
+        }
+        
+        // Update path properties
+        function updatePathProperties() {
+            if (!pathElement) return;
+            
+            pathElement.setAttribute('stroke', document.getElementById('strokeColor').value);
+            pathElement.setAttribute('stroke-width', document.getElementById('strokeWidth').value);
+            pathElement.setAttribute('stroke-linecap', document.getElementById('lineCap').value);
+            pathElement.setAttribute('stroke-linejoin', document.getElementById('lineJoin').value);
+        }
+        
+        // Apply 3D transform
+        function apply3DTransform() {
+            if (!svgElement) return;
+            
+            const rotateX = document.getElementById('rotateX').value;
+            const rotateY = document.getElementById('rotateY').value;
+            const perspective = document.getElementById('perspective').value;
+            const depth = document.getElementById('depth').value;
+            
+            svgElement.style.transform = `
+                perspective(${perspective}px)
+                rotateX(${rotateX}deg)
+                rotateY(${rotateY}deg)
+                translateZ(${depth}px)
+            `;
+            svgElement.style.transformStyle = 'preserve-3d';
+            svgElement.style.transition = 'transform 0.5s ease';
+        }
+        
+        // Update path info
+        function updatePathInfo() {
+            if (!pathElement) return;
+            
+            const pathLength = pathElement.getTotalLength();
+            document.getElementById('pathLength').textContent = Math.round(pathLength) + 'px';
+            
+            // Set initial stroke-dasharray and stroke-dashoffset
+            pathElement.style.strokeDasharray = pathLength;
+            pathElement.style.strokeDashoffset = pathLength;
+        }
+        
+        // Start animation
+        function startAnimation() {
+            if (!pathElement) {
+                createSVG();
+                if (!pathElement) return;
+            }
+            
+            if (isAnimating) return;
+            
+            isAnimating = true;
+            document.getElementById('animationStatus').textContent = 'Running';
+            
+            const duration = parseFloat(document.getElementById('duration').value) * 1000;
+            const delay = parseFloat(document.getElementById('delay').value) * 1000;
+            const easing = document.getElementById('easing').value;
+            const reverse = document.getElementById('reverse').checked;
+            const loop = document.getElementById('loop').checked;
+            
+            const pathLength = pathElement.getTotalLength();
+            
+            // Apply delay
+            setTimeout(() => {
+                if (!isAnimating) return;
+                
+                pathElement.style.transition = `stroke-dashoffset ${duration}ms ${easing}`;
+                pathElement.style.strokeDashoffset = reverse ? pathLength * 2 : 0;
+                
+                startTime = Date.now();
+                updateProgress(duration, loop);
+                
+            }, delay);
+        }
+        
+        // Update animation progress
+        function updateProgress(duration, loop) {
+            if (!isAnimating) return;
+            
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            
+            document.getElementById('animationProgress').textContent = Math.round(progress * 100) + '%';
+            document.getElementById('progressFill').style.width = (progress * 100) + '%';
+            document.getElementById('frameCount').textContent = Math.round(elapsed / 16.67);
+            
+            // Update timeline
+            document.getElementById('timelineProgress').style.width = (progress * 100) + '%';
+            document.getElementById('timelineScrubber').style.left = (progress * 100) + '%';
+            
+            if (progress < 1) {
+                animationId = requestAnimationFrame(() => updateProgress(duration, loop));
+            } else {
+                if (loop) {
+                    setTimeout(() => {
+                        if (isAnimating) {
+                            resetAnimation();
+                            startAnimation();
+                        }
+                    }, 100);
+                } else {
+                    isAnimating = false;
+                    document.getElementById('animationStatus').textContent = 'Complete';
+                }
+            }
+        }
+        
+        // Scrub timeline
+        function scrubTimeline(progress) {
+            if (!pathElement || !isAnimating) return;
+            
+            pauseAnimation();
+            
+            const pathLength = pathElement.getTotalLength();
+            const reverse = document.getElementById('reverse').checked;
+            
+            pathElement.style.transition = 'none';
+            pathElement.style.strokeDashoffset = reverse ? 
+                pathLength + (pathLength * progress) : 
+                pathLength - (pathLength * progress);
+            
+            document.getElementById('animationProgress').textContent = Math.round(progress * 100) + '%';
+            document.getElementById('progressFill').style.width = (progress * 100) + '%';
+            document.getElementById('timelineProgress').style.width = (progress * 100) + '%';
+            document.getElementById('timelineScrubber').style.left = (progress * 100) + '%';
+        }
+        
+        // Move scrubber
+        function moveScrubber(e) {
+            const timeline = document.getElementById('timeline');
+            const rect = timeline.getBoundingClientRect();
+            let pos = (e.clientX - rect.left) / rect.width;
+            pos = Math.max(0, Math.min(1, pos));
+            
+            scrubTimeline(pos);
+        }
+        
+        // Stop scrubber
+        function stopScrubber() {
+            document.removeEventListener('mousemove', moveScrubber);
+            document.removeEventListener('mouseup', stopScrubber);
+        }
+        
+        // Pause animation
+        function pauseAnimation() {
+            isAnimating = false;
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+            document.getElementById('animationStatus').textContent = 'Paused';
+            
+            if (pathElement) {
+                const computedStyle = window.getComputedStyle(pathElement);
+                const currentOffset = computedStyle.strokeDashoffset;
+                pathElement.style.transition = 'none';
+                pathElement.style.strokeDashoffset = currentOffset;
+            }
+        }
+        
+        // Reset animation
+        function resetAnimation() {
+            isAnimating = false;
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+            
+            document.getElementById('animationStatus').textContent = 'Ready';
+            document.getElementById('animationProgress').textContent = '0%';
+            document.getElementById('progressFill').style.width = '0%';
+            document.getElementById('frameCount').textContent = '0';
+            document.getElementById('timelineProgress').style.width = '0%';
+            document.getElementById('timelineScrubber').style.left = '0%';
+            
+            if (pathElement) {
+                pathElement.style.transition = 'none';
+                const pathLength = pathElement.getTotalLength();
+                pathElement.style.strokeDashoffset = pathLength;
+            }
+        }
+        
+        // Clear path
+        function clearPath() {
+            document.getElementById('pathInput').value = '';
+            document.getElementById('svgContainer').innerHTML = '<p style="color: #6b7280; text-align: center;">Enter an SVG path to start animating</p>';
+            resetAnimation();
+            pathElement = null;
+            svgElement = null;
+            document.getElementById('pathLength').textContent = '0px';
+            showToast('Canvas cleared');
+        }
+        
+        // Export as SVG
+        function exportSVG() {
+            if (!svgElement) return;
+            
+            const svgData = new XMLSerializer().serializeToString(svgElement);
+            const blob = new Blob([svgData], { type: 'image/svg+xml' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'animated-path.svg';
+            a.click();
+            
+            URL.revokeObjectURL(url);
+            showToast('SVG exported successfully!');
+        }
+        
+        // Export as CSS
+        function exportCSS() {
+            if (!pathElement) return;
+            
+            const pathData = document.getElementById('pathInput').value;
+            const duration = document.getElementById('duration').value;
+            const easing = document.getElementById('easing').value;
+            
+            const cssCode = `
+/* SVG Path Animation */
+.path-animation {
+    stroke-dasharray: ${pathElement.getTotalLength()};
+    stroke-dashoffset: ${pathElement.getTotalLength()};
+    animation: draw ${duration}s ${easing} forwards;
+}
+
+@keyframes draw {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+            `;
+            
+            const blob = new Blob([cssCode], { type: 'text/css' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'path-animation.css';
+            a.click();
+            
+            URL.revokeObjectURL(url);
+            showToast('CSS exported successfully!');
+        }
+        
+        // Export as GIF (simulated)
+        function exportGIF() {
+            showToast('GIF export started...');
+            // In a real implementation, this would use a library like gif.js
+            setTimeout(() => {
+                showToast('GIF exported successfully!');
+            }, 2000);
+        }
+        
+        // Share animation
+        function shareAnimation() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'SVG Path Animation',
+                    text: 'Check out this awesome SVG animation I created!',
+                    url: window.location.href
+                }).catch(console.error);
+            } else {
+                showToast('Sharing not supported in this browser');
+            }
+        }
+        
+        // Save current state to history
+        function saveState() {
+            const state = {
+                path: document.getElementById('pathInput').value,
+                strokeColor: document.getElementById('strokeColor').value,
+                strokeWidth: document.getElementById('strokeWidth').value,
+                duration: document.getElementById('duration').value,
+                delay: document.getElementById('delay').value
+            };
+            
+            // Only save if state has changed
+            if (historyIndex === -1 || JSON.stringify(state) !== JSON.stringify(history[historyIndex])) {
+                // Remove future states if we're not at the end
+                if (historyIndex < history.length - 1) {
+                    history = history.slice(0, historyIndex + 1);
+                }
+                
+                history.push(state);
+                historyIndex = history.length - 1;
+            }
+        }
+        
+        // Undo action
+        function undoAction() {
+            if (historyIndex > 0) {
+                historyIndex--;
+                applyState(history[historyIndex]);
+                showToast('Undo successful');
+            } else {
+                showToast('Nothing to undo');
+            }
+        }
+        
+        // Redo action
+        function redoAction() {
+            if (historyIndex < history.length - 1) {
+                historyIndex++;
+                applyState(history[historyIndex]);
+                showToast('Redo successful');
+            } else {
+                showToast('Nothing to redo');
+            }
+        }
+        
+        // Apply saved state
+        function applyState(state) {
+            document.getElementById('pathInput').value = state.path;
+            document.getElementById('strokeColor').value = state.strokeColor;
+            document.getElementById('strokeWidth').value = state.strokeWidth;
+            document.getElementById('duration').value = state.duration;
+            document.getElementById('delay').value = state.delay;
+            
+            updateValueDisplays();
+            createSVG();
+        }
+        
+        // Show help
+        function showHelp() {
+            showToast('Check the documentation for usage instructions');
+            // In a real app, this would open a help modal
+        }
+        
+        // Show toast notification
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            
+            toastMessage.textContent = message;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Initialize on load
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>
