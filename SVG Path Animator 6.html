@@ -1,0 +1,2047 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVG Path Animator Pro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 119, 198, 0.2) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            25% { transform: translateY(-10px) rotate(1deg); }
+            50% { transform: translateY(-5px) rotate(-1deg); }
+            75% { transform: translateY(-15px) rotate(0.5deg); }
+        }
+
+        /* Animated particles */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(2px 2px at 20px 30px, rgba(255, 255, 255, 0.3), transparent),
+                radial-gradient(2px 2px at 40px 70px, rgba(102, 126, 234, 0.2), transparent),
+                radial-gradient(1px 1px at 90px 40px, rgba(255, 255, 255, 0.2), transparent),
+                radial-gradient(1px 1px at 130px 80px, rgba(118, 75, 162, 0.2), transparent),
+                radial-gradient(2px 2px at 160px 30px, rgba(255, 255, 255, 0.1), transparent);
+            background-repeat: repeat;
+            background-size: 200px 200px;
+            animation: sparkle 15s linear infinite;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        @keyframes sparkle {
+            0% { transform: translateY(0px); }
+            100% { transform: translateY(-100px); }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+            min-height: 100vh;
+        }
+
+        .control-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 28px;
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.1),
+                0 1px 0 rgba(255, 255, 255, 0.8) inset,
+                0 -1px 0 rgba(0, 0, 0, 0.05) inset;
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .control-panel:hover {
+            transform: translateY(-2px);
+            box-shadow: 
+                0 25px 50px rgba(0, 0, 0, 0.15),
+                0 1px 0 rgba(255, 255, 255, 0.8) inset,
+                0 -1px 0 rgba(0, 0, 0, 0.05) inset;
+        }
+
+        .preview-area {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 28px;
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.1),
+                0 1px 0 rgba(255, 255, 255, 0.8) inset,
+                0 -1px 0 rgba(0, 0, 0, 0.05) inset;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .preview-area:hover {
+            transform: translateY(-2px);
+            box-shadow: 
+                0 25px 50px rgba(0, 0, 0, 0.15),
+                0 1px 0 rgba(255, 255, 255, 0.8) inset,
+                0 -1px 0 rgba(0, 0, 0, 0.05) inset;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 24px;
+            font-size: 28px;
+            font-weight: 700;
+            text-align: center;
+            background: linear-gradient(135deg, #667eea, #764ba2, #667eea);
+            background-size: 200% 100%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradient-flow 3s ease-in-out infinite;
+            position: relative;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 2px;
+            animation: pulse-width 2s ease-in-out infinite;
+        }
+
+        @keyframes gradient-flow {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        @keyframes pulse-width {
+            0%, 100% { width: 60px; opacity: 1; }
+            50% { width: 80px; opacity: 0.8; }
+        }
+
+        .section {
+            margin-bottom: 24px;
+            padding: 20px;
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(248, 249, 250, 0.8));
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 
+                0 8px 16px rgba(0, 0, 0, 0.04),
+                0 1px 0 rgba(255, 255, 255, 0.8) inset;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .section:hover {
+            transform: translateY(-1px);
+            box-shadow: 
+                0 12px 24px rgba(0, 0, 0, 0.08),
+                0 1px 0 rgba(255, 255, 255, 0.8) inset;
+        }
+
+        .section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea, #764ba2, #667eea);
+            border-radius: 16px 16px 0 0;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .section:hover::before {
+            opacity: 1;
+        }
+
+        .section h3 {
+            color: #2c3e50;
+            margin-bottom: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+
+        .section h3::before {
+            content: '';
+            width: 4px;
+            height: 16px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 2px;
+            margin-right: 8px;
+            animation: glow-pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes glow-pulse {
+            0%, 100% { 
+                box-shadow: 0 0 5px rgba(102, 126, 234, 0.5);
+                transform: scaleY(1);
+            }
+            50% { 
+                box-shadow: 0 0 15px rgba(102, 126, 234, 0.8);
+                transform: scaleY(1.1);
+            }
+        }
+
+        /* Enhanced label styling with better typography */
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #495057;
+            font-size: 14px;
+            letter-spacing: 0.3px;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+
+        label:hover {
+            color: #667eea;
+        }
+
+        /* Floating label effect for focused inputs */
+        .floating-label {
+            position: relative;
+            margin-bottom: 24px;
+        }
+
+        .floating-label input,
+        .floating-label select,
+        .floating-label textarea {
+            padding-top: 20px;
+        }
+
+        .floating-label label {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none;
+            color: #6c757d;
+            font-size: 14px;
+        }
+
+        .floating-label input:focus + label,
+        .floating-label input:not(:placeholder-shown) + label,
+        .floating-label select:focus + label,
+        .floating-label textarea:focus + label,
+        .floating-label textarea:not(:placeholder-shown) + label {
+            top: 4px;
+            font-size: 12px;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        textarea {
+            width: 100%;
+            height: 120px;
+            padding: 16px;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            border-radius: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            resize: vertical;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) inset;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 
+                0 0 0 4px rgba(102, 126, 234, 0.15),
+                0 4px 12px rgba(0, 0, 0, 0.05) inset;
+            transform: translateY(-1px);
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        textarea:hover:not(:focus) {
+            border-color: rgba(102, 126, 234, 0.4);
+            transform: translateY(-0.5px);
+        }
+
+        .control-group {
+            margin-bottom: 16px;
+        }
+
+        /* Enhanced input styling with better focus states */
+        .enhanced-input {
+            position: relative;
+        }
+
+        .enhanced-input::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 12px;
+            padding: 2px;
+            background: linear-gradient(135deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask-composite: exclude;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .enhanced-input:focus-within::before {
+            opacity: 1;
+        }
+
+        /* Custom checkbox and radio button styles */
+        .custom-checkbox,
+        .custom-radio {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            margin-bottom: 12px;
+            cursor: pointer;
+            font-size: 14px;
+            user-select: none;
+        }
+
+        .custom-checkbox input,
+        .custom-radio input {
+            opacity: 0;
+            position: absolute;
+            width: 0;
+            height: 0;
+        }
+
+        .checkmark,
+        .radiomark {
+            position: relative;
+            height: 20px;
+            width: 20px;
+            background: linear-gradient(145deg, #ffffff, #f8f9fa);
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            margin-right: 12px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .checkmark {
+            border-radius: 4px;
+        }
+
+        .radiomark {
+            border-radius: 50%;
+        }
+
+        .custom-checkbox:hover .checkmark,
+        .custom-radio:hover .radiomark {
+            border-color: #667eea;
+            transform: scale(1.05);
+        }
+
+        .custom-checkbox input:checked ~ .checkmark,
+        .custom-radio input:checked ~ .radiomark {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-color: #667eea;
+        }
+
+        .checkmark::after,
+        .radiomark::after {
+            content: '';
+            position: absolute;
+            display: none;
+        }
+
+        .custom-checkbox input:checked ~ .checkmark::after {
+            display: block;
+            left: 6px;
+            top: 2px;
+            width: 4px;
+            height: 8px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+
+        .custom-radio input:checked ~ .radiomark::after {
+            display: block;
+            top: 4px;
+            left: 4px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: white;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: linear-gradient(90deg, #e1e8ed, #f8f9fa);
+            outline: none;
+            -webkit-appearance: none;
+            margin-bottom: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) inset;
+            transition: all 0.3s ease;
+        }
+
+        input[type="range"]:hover {
+            background: linear-gradient(90deg, #d1d9e0, #e9ecef);
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            cursor: pointer;
+            box-shadow: 
+                0 4px 12px rgba(102, 126, 234, 0.4),
+                0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 3px solid white;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+            box-shadow: 
+                0 6px 16px rgba(102, 126, 234, 0.5),
+                0 2px 4px rgba(0, 0, 0, 0.15);
+        }
+
+        input[type="range"]::-webkit-slider-thumb:active {
+            transform: scale(0.95);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            cursor: pointer;
+            border: 3px solid white;
+            box-shadow: 
+                0 4px 12px rgba(102, 126, 234, 0.4),
+                0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        input[type="range"]::-moz-range-thumb:hover {
+            transform: scale(1.1);
+        }
+
+        select, input[type="color"], input[type="number"] {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            border-radius: 12px;
+            font-size: 14px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        select:focus, input[type="color"]:focus, input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 
+                0 0 0 4px rgba(102, 126, 234, 0.15),
+                0 2px 8px rgba(0, 0, 0, 0.1);
+            transform: translateY(-1px);
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        select:hover, input[type="color"]:hover, input[type="number"]:hover {
+            border-color: rgba(102, 126, 234, 0.4);
+            transform: translateY(-0.5px);
+        }
+
+        input[type="color"] {
+            height: 48px;
+            padding: 6px;
+            cursor: pointer;
+        }
+
+        input[type="color"]::-webkit-color-swatch {
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) inset;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        /* Advanced button hover effects */
+        button {
+            padding: 14px 22px;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            flex: 1;
+            min-width: 100px;
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        button:hover::before {
+            left: 100%;
+        }
+
+        /* Ripple effect on button click */
+        button::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.3s ease, height 0.3s ease;
+            pointer-events: none;
+        }
+
+        button:active::after {
+            width: 200px;
+            height: 200px;
+        }
+
+        /* Enhanced button variants with better gradients */
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #667eea 100%);
+            background-size: 200% 100%;
+            color: white;
+            box-shadow: 
+                0 4px 12px rgba(102, 126, 234, 0.4),
+                0 2px 4px rgba(0, 0, 0, 0.1);
+            animation: gradient-shift 3s ease infinite;
+        }
+
+        @keyframes gradient-shift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 
+                0 8px 24px rgba(102, 126, 234, 0.5),
+                0 4px 8px rgba(0, 0, 0, 0.15);
+            animation-duration: 1s;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(145deg, #ffffff, #f8f9fa);
+            color: #495057;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            box-shadow: 
+                0 2px 8px rgba(0, 0, 0, 0.05),
+                0 1px 0 rgba(255, 255, 255, 0.8) inset;
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+            transform: translateY(-2px) scale(1.02);
+            border-color: rgba(102, 126, 234, 0.4);
+            box-shadow: 
+                0 6px 16px rgba(0, 0, 0, 0.1),
+                0 1px 0 rgba(255, 255, 255, 0.8) inset;
+            color: #343a40;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 50%, #ff6b6b 100%);
+            background-size: 200% 100%;
+            color: white;
+            box-shadow: 
+                0 4px 12px rgba(255, 107, 107, 0.4),
+                0 2px 4px rgba(0, 0, 0, 0.1);
+            animation: gradient-shift-red 3s ease infinite;
+        }
+
+        @keyframes gradient-shift-red {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 
+                0 8px 24px rgba(255, 107, 107, 0.5),
+                0 4px 8px rgba(0, 0, 0, 0.15);
+            animation-duration: 1s;
+        }
+
+        .svg-container {
+            flex: 1;
+            border: 3px dashed rgba(102, 126, 234, 0.3);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 400px;
+            background: linear-gradient(145deg, #ffffff, #f8f9fa);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05) inset;
+        }
+
+        .svg-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 30% 70%, rgba(102, 126, 234, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 70% 30%, rgba(118, 75, 162, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .svg-container.active {
+            border-color: #667eea;
+            background: linear-gradient(145deg, #ffffff, #f8f9fa);
+            box-shadow: 
+                0 0 0 4px rgba(102, 126, 234, 0.1),
+                0 8px 24px rgba(0, 0, 0, 0.05) inset;
+            transform: scale(1.01);
+        }
+
+        .svg-container.active::before {
+            background: 
+                linear-gradient(45deg, rgba(102, 126, 234, 0.03) 25%, transparent 25%), 
+                linear-gradient(-45deg, rgba(102, 126, 234, 0.03) 25%, transparent 25%), 
+                linear-gradient(45deg, transparent 75%, rgba(102, 126, 234, 0.03) 75%), 
+                linear-gradient(-45deg, transparent 75%, rgba(102, 126, 234, 0.03) 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+        }
+
+        #animatedSVG {
+            max-width: 100%;
+            max-height: 100%;
+            filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.15));
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: subtle-float 6s ease-in-out infinite;
+        }
+
+        #animatedSVG:hover {
+            filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.2));
+            transform: scale(1.02);
+        }
+
+        @keyframes subtle-float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-3px); }
+        }
+
+        /* Enhanced progress animation with particle trail */
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2, #667eea);
+            background-size: 200% 100%;
+            width: 0%;
+            transition: width 0.1s ease;
+            border-radius: 8px;
+            position: relative;
+            animation: shimmer 2s ease-in-out infinite;
+            overflow: hidden;
+        }
+
+        .progress-fill::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: -4px;
+            width: 8px;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+            animation: pulse-glow 1s ease-in-out infinite;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { 
+                opacity: 0.8;
+                transform: scaleX(1);
+            }
+            50% { 
+                opacity: 1;
+                transform: scaleX(1.2);
+            }
+        }
+
+        /* Advanced stat item hover effects */
+        .stat-item:hover .stat-value {
+            transform: scale(1.1);
+            color: #667eea;
+            text-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 800;
+            color: #495057;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .stat-value::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 1px;
+            transition: width 0.3s ease;
+        }
+
+        .stat-item:hover .stat-value::after {
+            width: 100%;
+        }
+
+        .value-display {
+            font-size: 12px;
+            color: #667eea;
+            font-weight: 600;
+            text-align: right;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: linear-gradient(90deg, #e1e8ed, #f1f3f4);
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 20px 0;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) inset;
+            position: relative;
+        }
+
+        .progress-bar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2, #667eea);
+            background-size: 200% 100%;
+            width: 0%;
+            transition: width 0.1s ease;
+            border-radius: 8px;
+            position: relative;
+            animation: shimmer 2s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.3), transparent);
+            border-radius: 8px 8px 0 0;
+        }
+
+        .preset-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .preset-btn {
+            padding: 12px 16px;
+            background: linear-gradient(145deg, #ffffff, #f8f9fa);
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            border-radius: 10px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .preset-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+            transition: left 0.4s ease;
+        }
+
+        .preset-btn:hover::before {
+            left: 100%;
+        }
+
+        .preset-btn:hover {
+            background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+            transform: translateY(-2px);
+            border-color: rgba(102, 126, 234, 0.4);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .preset-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 16px 12px;
+            background: linear-gradient(145deg, rgba(102, 126, 234, 0.08), rgba(118, 75, 162, 0.08));
+            border-radius: 12px;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 12px 12px 0 0;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(102, 126, 234, 0.15);
+            background: linear-gradient(145deg, rgba(102, 126, 234, 0.12), rgba(118, 75, 162, 0.12));
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 4px;
+        }
+
+        .tooltip {
+            position: relative;
+            cursor: help;
+        }
+
+        .tooltip::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .tooltip::before {
+            content: '';
+            position: absolute;
+            bottom: 115%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: #2c3e50;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1001;
+        }
+
+        .tooltip:hover::after,
+        .tooltip:hover::before {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-4px);
+        }
+
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+                gap: 16px;
+                padding: 16px;
+            }
+            
+            .control-panel {
+                position: static;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .preset-buttons {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Add loading animation for buttons */
+        .btn-loading {
+            position: relative;
+            color: transparent !important;
+        }
+
+        .btn-loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            margin-top: -10px;
+            margin-left: -10px;
+            border: 2px solid transparent;
+            border-top: 2px solid currentColor;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            color: white;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Add focus visible styles for accessibility */
+        button:focus-visible,
+        input:focus-visible,
+        select:focus-visible,
+        textarea:focus-visible {
+            outline: 2px solid #667eea;
+            outline-offset: 2px;
+        }
+
+        /* Add subtle animations for value changes */
+        .value-display {
+            transition: all 0.3s ease;
+        }
+
+        .value-display.updated {
+            color: #667eea;
+            transform: scale(1.05);
+        }
+
+        /* Advanced notification system */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+            transform: translateX(400px);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background: linear-gradient(135deg, #28a745, #20c997);
+        }
+
+        .notification.error {
+            background: linear-gradient(135deg, #dc3545, #fd7e14);
+        }
+
+        /* Enhanced scroll indicator */
+        .scroll-indicator {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            z-index: 1000;
+            transform-origin: left;
+            transform: scaleX(0);
+            transition: transform 0.1s ease;
+        }
+
+        /* Loading skeleton for better UX */
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            border-radius: 8px;
+        }
+
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* Enhanced dropdown menus */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            min-width: 200px;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+            border-radius: 12px;
+            z-index: 1;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            overflow: hidden;
+            animation: fadeInDown 0.3s ease;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .dropdown-content a {
+            color: #495057;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            transition: all 0.3s ease;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .dropdown-content a:hover {
+            background: linear-gradient(90deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            color: #667eea;
+            transform: translateX(4px);
+        }
+
+        /* Enhanced tab system */
+        .tab-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .tab-nav {
+            display: flex;
+            background: linear-gradient(90deg, #f8f9fa, #e9ecef);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 16px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            font-weight: 500;
+        }
+
+        .tab-btn.active {
+            background: white;
+            color: #667eea;
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+
+        .tab-content {
+            padding: 24px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Improved modal dialogs */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            animation: modalFadeIn 0.3s ease;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            margin: 15% auto;
+            padding: 32px;
+            border-radius: 20px;
+            width: 80%;
+            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from { 
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to { 
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        /* Enhanced mobile responsiveness */
+        @media (max-width: 768px) {
+            .container {
+                padding: 12px;
+            }
+
+            .control-panel,
+            .preview-area {
+                padding: 20px;
+                border-radius: 16px;
+            }
+
+            .section {
+                padding: 16px;
+            }
+
+            .button-group {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            button {
+                min-width: auto;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .notification {
+                right: 12px;
+                left: 12px;
+                transform: translateY(-100px);
+            }
+
+            .notification.show {
+                transform: translateY(0);
+            }
+        }
+
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            }
+
+            .control-panel,
+            .preview-area {
+                background: rgba(30, 30, 50, 0.95);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .section {
+                background: linear-gradient(145deg, rgba(40, 40, 60, 0.9), rgba(30, 30, 50, 0.8));
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            textarea,
+            select,
+            input[type="color"],
+            input[type="number"] {
+                background: rgba(40, 40, 60, 0.8);
+                border-color: rgba(102, 126, 234, 0.3);
+                color: #e1e8ed;
+            }
+
+            label {
+                color: #b8c5d1;
+            }
+
+            .svg-container {
+                background: linear-gradient(145deg, #2c2c54, #40407a);
+                border-color: rgba(102, 126, 234, 0.5);
+            }
+        }
+
+        /* Reduced motion for accessibility */
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* High contrast mode support */
+        @media (prefers-contrast: high) {
+            .control-panel,
+            .preview-area,
+            .section {
+                border: 2px solid;
+            }
+
+            button {
+                border: 2px solid;
+            }
+
+            .btn-primary {
+                background: #0000ff;
+                border-color: #ffffff;
+            }
+
+            .btn-secondary {
+                background: #ffffff;
+                color: #000000;
+                border-color: #000000;
+            }
+        }
+
+        /* Print styles */
+        @media print {
+            body {
+                background: white;
+            }
+
+            .control-panel,
+            .preview-area {
+                background: white;
+                box-shadow: none;
+                border: 1px solid #000;
+            }
+
+            button,
+            input,
+            select,
+            textarea {
+                display: none;
+            }
+
+            .svg-container {
+                border: 1px solid #000;
+                page-break-inside: avoid;
+            }
+        }
+
+        /* Focus management for keyboard navigation */
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 6px;
+            background: #667eea;
+            color: white;
+            padding: 8px;
+            text-decoration: none;
+            border-radius: 4px;
+            z-index: 1000;
+            transition: top 0.3s ease;
+        }
+
+        .skip-link:focus {
+            top: 6px;
+        }
+
+        /* Enhanced focus indicators */
+        *:focus-visible {
+            outline: 3px solid #667eea;
+            outline-offset: 2px;
+            border-radius: 4px;
+        }
+
+        /* Improved selection styling */
+        ::selection {
+            background: rgba(102, 126, 234, 0.3);
+            color: #2c3e50;
+        }
+
+        ::-moz-selection {
+            background: rgba(102, 126, 234, 0.3);
+            color: #2c3e50;
+        }
+
+        /* Custom scrollbar for better UX */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 4px;
+            transition: background 0.3s ease;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #7c8df0, #8a5ab8);
+        }
+
+        /* Performance optimizations */
+        .will-change-transform {
+            will-change: transform;
+        }
+
+        .will-change-opacity {
+            will-change: opacity;
+        }
+
+        .gpu-accelerated {
+            transform: translateZ(0);
+            backface-visibility: hidden;
+            perspective: 1000;
+        }
+
+        .export-section {
+            border-top: 1px solid #e1e8ed;
+            padding-top: 16px;
+            margin-top: 16px;
+        }
+
+        .code-output {
+            background: linear-gradient(145deg, #2c3e50, #34495e);
+            color: #ecf0f1;
+            padding: 16px;
+            border-radius: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 120px;
+            overflow-y: auto;
+            margin-top: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) inset;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+        }
+
+        .code-output::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .code-output::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .code-output::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+        }
+
+        .code-output::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 16px 12px;
+            background: linear-gradient(145deg, #ffffff, #e0e0e0); /* soft gradient */
+            box-shadow: 4px 4px 8px #d1d1d1, -4px -4px 8px #ffffff; /* subtle neumorphic effect */
+            border-radius: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="control-panel">
+            <h1>SVG Path Animator Pro</h1>
+            
+            <div class="section">
+                <h3>📝 SVG Path Input</h3>
+                <textarea id="pathInput" placeholder="Paste your SVG path data here... (e.g., M10,150 C10,150 70,10 150,150 C230,290 290,150 290,150)"></textarea>
+                <div class="preset-buttons">
+                    <button class="preset-btn" onclick="loadPreset('heart')">❤️ Heart</button>
+                    <button class="preset-btn" onclick="loadPreset('star')">⭐ Star</button>
+                    <button class="preset-btn" onclick="loadPreset('infinity')">∞ Infinity</button>
+                    <button class="preset-btn" onclick="loadPreset('wave')">🌊 Wave</button>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>⚡ Animation Controls</h3>
+                <div class="control-group">
+                    <label for="duration" class="tooltip" data-tooltip="Animation duration in seconds">Duration: <span id="durationValue" class="value-display">3s</span></label>
+                    <input type="range" id="duration" min="0.5" max="10" step="0.1" value="3">
+                </div>
+                
+                <div class="control-group">
+                    <label for="easing">Easing Function:</label>
+                    <select id="easing">
+                        <option value="linear">Linear</option>
+                        <option value="ease">Ease</option>
+                        <option value="ease-in">Ease In</option>
+                        <option value="ease-out">Ease Out</option>
+                        <option value="ease-in-out" selected>Ease In-Out</option>
+                        <option value="cubic-bezier(0.68, -0.55, 0.265, 1.55)">Bounce</option>
+                        <option value="cubic-bezier(0.25, 0.46, 0.45, 0.94)">Smooth</option>
+                        <option value="cubic-bezier(0.175, 0.885, 0.32, 1.275)">Spring</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="delay" class="tooltip" data-tooltip="Delay before animation starts">Delay: <span id="delayValue" class="value-display">0s</span></label>
+                    <input type="range" id="delay" min="0" max="3" step="0.1" value="0">
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-primary" onclick="startAnimation()">▶️ Play</button>
+                    <button class="btn-secondary" onclick="pauseAnimation()">⏸️ Pause</button>
+                    <button class="btn-danger" onclick="resetAnimation()">🔄 Reset</button>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>🎨 Stroke Styling</h3>
+                <div class="control-group">
+                    <label for="strokeColor">Stroke Color:</label>
+                    <input type="color" id="strokeColor" value="#667eea">
+                </div>
+                
+                <div class="control-group">
+                    <label for="strokeWidth" class="tooltip" data-tooltip="Thickness of the stroke line">Stroke Width: <span id="strokeWidthValue" class="value-display">3px</span></label>
+                    <input type="range" id="strokeWidth" min="1" max="20" value="3">
+                </div>
+
+                <div class="control-group">
+                    <label for="strokeDash">Dash Pattern:</label>
+                    <select id="strokeDash">
+                        <option value="">Solid</option>
+                        <option value="5,5">Dashed</option>
+                        <option value="10,5">Long Dash</option>
+                        <option value="2,3">Dotted</option>
+                        <option value="10,5,2,5">Dash-Dot</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="strokeCap">Line Cap:</label>
+                    <select id="strokeCap">
+                        <option value="round" selected>Round</option>
+                        <option value="square">Square</option>
+                        <option value="butt">Butt</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>📊 Animation Progress</h3>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="pathLength">0</div>
+                        <div class="stat-label">Path Length</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="currentProgress">0%</div>
+                        <div class="stat-label">Progress</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="timeRemaining">0s</div>
+                        <div class="stat-label">Time Left</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section export-section">
+                <h3>💾 Export & Code</h3>
+                <div class="button-group">
+                    <button class="btn-secondary" onclick="exportSVG()">📁 Export SVG</button>
+                    <button class="btn-secondary" onclick="copyCSS()">📋 Copy CSS</button>
+                </div>
+                <div class="code-output" id="codeOutput">
+                    Click "Copy CSS" to see the generated animation code
+                </div>
+            </div>
+        </div>
+
+        <div class="preview-area">
+            <div class="svg-container" id="svgContainer">
+                <p style="color: #6c757d; text-align: center;">
+                    Enter an SVG path to see the animation preview<br>
+                    <small>Try one of the preset examples to get started!</small>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Enhanced initialization with performance optimizations
+        let currentAnimation = null;
+        let isPaused = false;
+        let animationStartTime = 0;
+        let pausedTime = 0;
+        let isHighPerformanceMode = false;
+
+        // Detect user's performance preference
+        function detectPerformanceMode() {
+            const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+            const isSlowConnection = connection && (connection.effectiveType === 'slow-2g' || connection.effectiveType === '2g');
+            const isLowEndDevice = navigator.hardwareConcurrency <= 2;
+            const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            
+            return !isSlowConnection && !isLowEndDevice && !prefersReducedMotion;
+        }
+
+        isHighPerformanceMode = detectPerformanceMode();
+
+        // Enhanced error handling with user feedback
+        function handleError(error, context = '') {
+            console.error(`Error in ${context}:`, error);
+            showNotification(`Error: ${error.message || 'Something went wrong'}`, 'error', 5000);
+        }
+
+        // Debounced resize handler for better performance
+        let resizeTimeout;
+        function handleResize() {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                updatePreview();
+                showNotification('Layout updated for new screen size', 'info', 2000);
+            }, 250);
+        }
+
+        window.addEventListener('resize', handleResize);
+
+        // Scroll progress indicator
+        function updateScrollIndicator() {
+            const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+            const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrollPercent = (scrollTop / scrollHeight) * 100;
+            
+            let indicator = document.querySelector('.scroll-indicator');
+            if (!indicator) {
+                indicator = document.createElement('div');
+                indicator.className = 'scroll-indicator';
+                document.body.appendChild(indicator);
+            }
+            indicator.style.transform = `scaleX(${scrollPercent / 100})`;
+        }
+
+        window.addEventListener('scroll', updateScrollIndicator);
+
+        // Enhanced value display updates with animation
+        function updateValueDisplay(elementId, value, unit = '') {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.classList.add('updated');
+                element.textContent = value + unit;
+                setTimeout(() => element.classList.remove('updated'), 300);
+            }
+        }
+
+        // Performance monitoring
+        let performanceMetrics = {
+            animationFrameCount: 0,
+            lastFrameTime: 0,
+            fps: 0
+        };
+
+        function monitorPerformance() {
+            const now = performance.now();
+            performanceMetrics.animationFrameCount++;
+            
+            if (now - performanceMetrics.lastFrameTime >= 1000) {
+                performanceMetrics.fps = performanceMetrics.animationFrameCount;
+                performanceMetrics.animationFrameCount = 0;
+                performanceMetrics.lastFrameTime = now;
+                
+                // Log performance if FPS drops below 30
+                if (performanceMetrics.fps < 30 && performanceMetrics.fps > 0) {
+                    console.warn(`Low FPS detected: ${performanceMetrics.fps}`);
+                }
+            }
+            
+            requestAnimationFrame(monitorPerformance);
+        }
+
+        // Start performance monitoring
+        monitorPerformance();
+
+        // Preset SVG paths
+        const presets = {
+            heart: "M12,21.35l-1.45-1.32C5.4,15.36,2,12.28,2,8.5 C2,5.42,4.42,3,7.5,3c1.74,0,3.41,0.81,4.5,2.09C13.09,3.81,14.76,3,16.5,3 C19.58,3,22,5.42,22,8.5c0,3.78-3.4,6.86-8.55,11.54L12,21.35z",
+            star: "M20.285 2l-11.285 11.567-5.286-5.011-3.714 3.716 9 8.728 15-15.285z",
+            infinity: "M9.828 12c0 1.38-1.12 2.5-2.5 2.5s-2.5-1.12-2.5-2.5 1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5zm9.172 0c0 1.38-1.12 2.5-2.5 2.5s-2.5-1.12-2.5-2.5 1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5z",
+            wave: "M2 12 Q 8 6, 14 12 T 26 12 Q 32 6, 38 12 T 50 12"
+        };
+
+        // Initialize UI elements
+        document.getElementById('duration').addEventListener('input', updateDurationDisplay);
+        document.getElementById('delay').addEventListener('input', updateDelayDisplay);
+        document.getElementById('strokeWidth').addEventListener('input', updateStrokeWidthDisplay);
+        document.getElementById('pathInput').addEventListener('input', debounce(updatePreview, 300));
+        
+        // Add event listeners for real-time updates
+        ['strokeColor', 'strokeDash', 'strokeCap'].forEach(id => {
+            document.getElementById(id).addEventListener('change', updatePreview);
+        });
+
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        function updateDurationDisplay() {
+            const value = document.getElementById('duration').value;
+            updateValueDisplay('durationValue', value, 's');
+        }
+
+        function updateDelayDisplay() {
+            const value = document.getElementById('delay').value;
+            updateValueDisplay('delayValue', value, 's');
+        }
+
+        function updateStrokeWidthDisplay() {
+            const value = document.getElementById('strokeWidth').value;
+            updateValueDisplay('strokeWidthValue', value, 'px');
+            updatePreview();
+        }
+
+        function loadPreset(type) {
+            try {
+                document.getElementById('pathInput').value = presets[type];
+                updatePreview();
+                showNotification(`Loaded ${type} preset successfully!`, 'success', 2000);
+            } catch (error) {
+                handleError(error, 'loadPreset');
+            }
+        }
+
+        function updatePreview() {
+            try {
+                const pathData = document.getElementById('pathInput').value.trim();
+                const container = document.getElementById('svgContainer');
+                
+                if (!pathData) {
+                    container.innerHTML = `
+                        <p style="color: #6c757d; text-align: center;">
+                            Enter an SVG path to see the animation preview<br>
+                            <small>Try one of the preset examples to get started!</small>
+                        </p>
+                    `;
+                    container.classList.remove('active');
+                    return;
+                }
+
+                container.classList.add('active');
+                
+                // Create SVG element with enhanced attributes
+                const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                svg.id = 'animatedSVG';
+                svg.setAttribute('viewBox', '0 0 300 200');
+                svg.setAttribute('width', '100%');
+                svg.setAttribute('height', '100%');
+                svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+                
+                // Add GPU acceleration for better performance
+                if (isHighPerformanceMode) {
+                    svg.classList.add('gpu-accelerated', 'will-change-transform');
+                }
+                
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('d', pathData);
+                path.setAttribute('fill', 'none');
+                path.setAttribute('stroke', document.getElementById('strokeColor').value);
+                path.setAttribute('stroke-width', document.getElementById('strokeWidth').value);
+                path.setAttribute('stroke-linecap', document.getElementById('strokeCap').value);
+                
+                const dashPattern = document.getElementById('strokeDash').value;
+                if (dashPattern) {
+                    path.setAttribute('stroke-dasharray', dashPattern);
+                }
+                
+                svg.appendChild(path);
+                container.innerHTML = '';
+                container.appendChild(svg);
+
+                // Calculate and display path length with error handling
+                try {
+                    const pathLength = Math.round(path.getTotalLength());
+                    updateValueDisplay('pathLength', pathLength.toLocaleString());
+                    
+                    // Reset stroke-dasharray for animation
+                    path.style.strokeDasharray = pathLength;
+                    path.style.strokeDashoffset = pathLength;
+                } catch (e) {
+                    console.warn('Could not calculate path length:', e);
+                    document.getElementById('pathLength').textContent = 'N/A';
+                    showNotification('Path length calculation failed - complex path detected', 'error', 3000);
+                }
+            } catch (error) {
+                handleError(error, 'updatePreview');
+            }
+        }
+
+        function startAnimation() {
+            try {
+                const svg = document.getElementById('animatedSVG');
+                if (!svg) {
+                    showNotification('Please enter a valid SVG path first!', 'error', 3000);
+                    return;
+                }
+
+                const path = svg.querySelector('path');
+                const duration = parseFloat(document.getElementById('duration').value);
+                const delay = parseFloat(document.getElementById('delay').value);
+                const easing = document.getElementById('easing').value;
+
+                // Clear any existing animation
+                if (currentAnimation) {
+                    currentAnimation.cancel();
+                }
+
+                // Add loading state to button
+                const playButton = document.querySelector('.btn-primary');
+                playButton.classList.add('btn-loading');
+
+                try {
+                    const pathLength = path.getTotalLength();
+                    
+                    // Set up initial state with enhanced properties
+                    path.style.strokeDasharray = pathLength;
+                    path.style.strokeDashoffset = pathLength;
+                    
+                    // Add performance optimizations
+                    if (isHighPerformanceMode) {
+                        path.classList.add('will-change-transform');
+                    }
+                    
+                    // Create and start animation with enhanced options
+                    currentAnimation = path.animate([
+                        { strokeDashoffset: pathLength },
+                        { strokeDashoffset: 0 }
+                    ], {
+                        duration: duration * 1000,
+                        delay: delay * 1000,
+                        easing: easing,
+                        fill: 'forwards'
+                    });
+
+                    animationStartTime = Date.now() + (delay * 1000);
+                    isPaused = false;
+                    
+                    // Remove loading state
+                    setTimeout(() => playButton.classList.remove('btn-loading'), 500);
+                    
+                    // Update progress during animation
+                    updateProgressLoop(duration);
+                    
+                    currentAnimation.addEventListener('finish', () => {
+                        updateValueDisplay('currentProgress', '100', '%');
+                        updateValueDisplay('timeRemaining', '0', 's');
+                        document.getElementById('progressFill').style.width = '100%';
+                        showNotification('Animation completed!', 'success', 2000);
+                        
+                        // Clean up performance optimizations
+                        if (isHighPerformanceMode) {
+                            path.classList.remove('will-change-transform');
+                        }
+                    });
+
+                    showNotification('Animation started!', 'success', 2000);
+
+                } catch (e) {
+                    playButton.classList.remove('btn-loading');
+                    throw new Error('Animation setup failed: ' + e.message);
+                }
+            } catch (error) {
+                handleError(error, 'startAnimation');
+            }
+        }
+
+        function pauseAnimation() {
+            if (currentAnimation) {
+                if (isPaused) {
+                    currentAnimation.play();
+                    animationStartTime = Date.now() - pausedTime;
+                    isPaused = false;
+                    document.querySelector('.btn-secondary').innerHTML = '⏸️ Pause';
+                } else {
+                    currentAnimation.pause();
+                    pausedTime = Date.now() - animationStartTime;
+                    isPaused = true;
+                    document.querySelector('.btn-secondary').innerHTML = '▶️ Resume';
+                }
+            }
+        }
+
+        function resetAnimation() {
+            if (currentAnimation) {
+                currentAnimation.cancel();
+                currentAnimation = null;
+            }
+            
+            const svg = document.getElementById('animatedSVG');
+            if (svg) {
+                const path = svg.querySelector('path');
+                try {
+                    const pathLength = path.getTotalLength();
+                    path.style.strokeDashoffset = pathLength;
+                } catch (e) {
+                    console.warn('Could not reset path');
+                }
+            }
+            
+            document.getElementById('currentProgress').textContent = '0%';
+            document.getElementById('timeRemaining').textContent = '0s';
+            document.getElementById('progressFill').style.width = '0%';
+            document.querySelector('.btn-secondary').innerHTML = '⏸️ Pause';
+            isPaused = false;
+        }
+
+        function updateProgressLoop(totalDuration) {
+            if (!currentAnimation || currentAnimation.playState === 'finished') return;
+            
+            const now = Date.now();
+            const elapsed = Math.max(0, now - animationStartTime) / 1000;
+            const progress = Math.min(100, (elapsed / totalDuration) * 100);
+            const remaining = Math.max(0, totalDuration - elapsed);
+            
+            document.getElementById('currentProgress').textContent = Math.round(progress) + '%';
+            document.getElementById('timeRemaining').textContent = remaining.toFixed(1) + 's';
+            document.getElementById('progressFill').style.width = progress + '%';
+            
+            if (progress < 100 && !isPaused) {
+                requestAnimationFrame(() => updateProgressLoop(totalDuration));
+            }
+        }
+
+        function exportSVG() {
+            const svg = document.getElementById('animatedSVG');
+            if (!svg) {
+                alert('No SVG to export. Please create an animation first.');
+                return;
+            }
+            
+            const svgData = new XMLSerializer().serializeToString(svg);
+            const blob = new Blob([svgData], { type: 'image/svg+xml' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'animated-path.svg';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function copyCSS() {
+            const pathData = document.getElementById('pathInput').value.trim();
+            const duration = document.getElementById('duration').value;
+            const delay = document.getElementById('delay').value;
+            const easing = document.getElementById('easing').value;
+            const strokeColor = document.getElementById('strokeColor').value;
+            const strokeWidth = document.getElementById('strokeWidth').value;
+            const strokeCap = document.getElementById('strokeCap').value;
+            const strokeDash = document.getElementById('strokeDash').value;
+            
+            if (!pathData) {
+                alert('Please enter an SVG path first.');
+                return;
+            }
+
+            const css = `/* SVG Path Animation CSS */
+.animated-path {
+    fill: none;
+    stroke: ${strokeColor};
+    stroke-width: ${strokeWidth}px;
+    stroke-linecap: ${strokeCap};${strokeDash ? `\n    stroke-dasharray: ${strokeDash};` : ''}
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+    animation: draw-path ${duration}s ${easing} ${delay}s forwards;
+}
+
+@keyframes draw-path {
+    to { stroke-dashoffset: 0; }
+}
+
+/* HTML Structure */
+<svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+    <path d="${pathData}" class="animated-path"/>
+</svg>`;
+            
+            navigator.clipboard.writeText(css).then(() => {
+                document.getElementById('codeOutput').textContent = css;
+                alert('CSS code copied to clipboard!');
+            }).catch(() => {
+                document.getElementById('codeOutput').textContent = css;
+                alert('CSS code generated! (Copy manually if clipboard access failed)');
+            });
+        }
+
+        // Initialize displays
+        updateDurationDisplay();
+        updateDelayDisplay();
+        updateStrokeWidthDisplay();
+        
+        // Load a default preset
+        setTimeout(() => {
+            loadPreset('wave');
+        }, 500);
+    </script>
+</body>
+</html>
