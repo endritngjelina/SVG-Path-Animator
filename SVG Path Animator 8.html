@@ -1,0 +1,1770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVG Path Animator Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --accent: #f093fb;
+            --dark: #2c3e50;
+            --light: #f8f9fa;
+            --success: #27ae60;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --info: #3498db;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+            color: #f0f0f0;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 119, 198, 0.1) 0%, transparent 50%);
+            animation: floatingParticles 20s ease-in-out infinite;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        @keyframes floatingParticles {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            33% { transform: translateY(-20px) rotate(1deg); }
+            66% { transform: translateY(10px) rotate(-1deg); }
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: rgba(30, 30, 46, 0.6);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 
+                0 32px 64px rgba(0, 0, 0, 0.3), 
+                0 0 0 1px rgba(255, 255, 255, 0.1) inset,
+                0 2px 16px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(20px) saturate(1.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: containerFadeIn 0.8s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary), var(--accent), var(--secondary));
+            background-size: 200% 100%;
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes containerFadeIn {
+            from { opacity: 0; transform: translateY(30px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        @keyframes shimmer {
+            0%, 100% { background-position: -200% 0; }
+            50% { background-position: 200% 0; }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+            padding-bottom: 20px;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(45deg, var(--primary), var(--accent));
+            border-radius: 2px;
+            opacity: 0.8;
+        }
+
+        .header h1 {
+            font-size: 3.2rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 50%, var(--secondary) 100%);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 4s ease-in-out infinite;
+            letter-spacing: -1px;
+            position: relative;
+        }
+
+        .header p {
+            color: #a0aec0;
+            font-size: 1.2rem;
+            font-weight: 300;
+            opacity: 0.9;
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 1200px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background: rgba(26, 26, 39, 0.6);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.2),
+                0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .panel:hover {
+            transform: translateY(-5px);
+            box-shadow: 
+                0 16px 48px rgba(0, 0, 0, 0.3),
+                0 0 0 1px rgba(102, 126, 234, 0.1) inset;
+        }
+
+        .panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.05), transparent);
+            transition: left 0.6s;
+        }
+
+        .panel:hover::before {
+            left: 100%;
+        }
+
+        .section {
+            margin-bottom: 30px;
+            position: relative;
+            animation: sectionSlideIn 0.6s ease-out;
+            animation-fill-mode: both;
+        }
+
+        .section:nth-child(1) { animation-delay: 0.1s; }
+        .section:nth-child(2) { animation-delay: 0.2s; }
+        .section:nth-child(3) { animation-delay: 0.3s; }
+        .section:nth-child(4) { animation-delay: 0.4s; }
+
+        @keyframes sectionSlideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            position: relative;
+            padding-left: 10px;
+        }
+
+        .section-header::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(45deg, var(--primary), var(--accent));
+            border-radius: 2px;
+            opacity: 0.8;
+        }
+
+        .section-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            animation: iconPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes iconPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4); }
+            50% { transform: scale(1.05); box-shadow: 0 6px 16px rgba(102, 126, 234, 0.5); }
+        }
+
+        .section-title {
+            color: #e2e8f0;
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .input-label {
+            display: block;
+            margin-bottom: 8px;
+            color: #cbd5e0;
+            font-weight: 500;
+            font-size: 1rem;
+            transition: color 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .input-label i {
+            width: 24px;
+            text-align: center;
+            color: var(--accent);
+        }
+
+        .input-group:focus-within .input-label {
+            color: var(--accent);
+        }
+
+        textarea, input[type="text"] {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            font-family: 'Fira Code', 'Courier New', monospace;
+            font-size: 0.95rem;
+            background: rgba(15, 15, 25, 0.5);
+            color: #e2e8f0;
+            resize: vertical;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+            line-height: 1.5;
+        }
+
+        textarea:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
+            background: rgba(15, 15, 25, 0.7);
+            transform: translateY(-2px);
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: rgba(233, 236, 239, 0.1);
+            outline: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        input[type="range"]:hover {
+            transform: scaleY(1.2);
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            cursor: pointer;
+            box-shadow: 
+                0 4px 12px rgba(102, 126, 234, 0.5),
+                0 0 0 4px rgba(26, 26, 39, 0.8),
+                0 0 0 6px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+            box-shadow: 
+                0 6px 16px rgba(102, 126, 234, 0.6),
+                0 0 0 4px rgba(26, 26, 39, 0.9),
+                0 0 0 8px rgba(102, 126, 234, 0.4);
+        }
+
+        input[type="color"] {
+            width: 100%;
+            height: 48px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 
+                0 4px 16px rgba(0, 0, 0, 0.2),
+                0 0 0 2px rgba(255, 255, 255, 0.05) inset;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(15, 15, 25, 0.5);
+        }
+
+        input[type="color"]:hover {
+            transform: translateY(-2px);
+            box-shadow: 
+                0 8px 24px rgba(0, 0, 0, 0.3),
+                0 0 0 2px rgba(255, 255, 255, 0.1) inset;
+        }
+
+        select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            background: rgba(15, 15, 25, 0.5);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 500;
+            color: #e2e8f0;
+            backdrop-filter: blur(10px);
+        }
+
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 
+                0 0 0 4px rgba(102, 126, 234, 0.15),
+                0 4px 16px rgba(102, 126, 234, 0.2);
+            background: rgba(15, 15, 25, 0.7);
+            transform: translateY(-2px);
+        }
+
+        select:hover {
+            border-color: rgba(102, 126, 234, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .range-display {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 8px;
+            font-size: 0.85rem;
+            color: #a0aec0;
+            font-weight: 500;
+        }
+
+        .range-value {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            padding: 6px 14px;
+            border-radius: 16px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            animation: valueUpdate 0.3s ease-out;
+        }
+
+        @keyframes valueUpdate {
+            0% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        .btn {
+            padding: 14px 20px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            font-size: 0.95rem;
+        }
+
+        .btn i {
+            font-size: 1.1rem;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            color: white;
+            box-shadow: 0 6px 18px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 32px rgba(102, 126, 234, 0.5);
+        }
+
+        .btn-primary:active {
+            transform: translateY(-1px) scale(0.98);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+            color: white;
+            box-shadow: 0 6px 18px rgba(74, 85, 104, 0.3);
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 32px rgba(74, 85, 104, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger) 0%, #c0392b 100%);
+            color: white;
+            box-shadow: 0 6px 18px rgba(231, 76, 60, 0.3);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 32px rgba(231, 76, 60, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success) 0%, #219a52 100%);
+            color: white;
+            box-shadow: 0 6px 18px rgba(39, 174, 96, 0.3);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 32px rgba(39, 174, 96, 0.4);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, var(--warning) 0%, #e67e22 100%);
+            color: white;
+            box-shadow: 0 6px 18px rgba(243, 156, 18, 0.3);
+        }
+
+        .btn-warning:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 32px rgba(243, 156, 18, 0.4);
+        }
+
+        .svg-container {
+            width: 100%;
+            height: 500px;
+            border: 3px dashed rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(15, 15, 25, 0.4);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+        }
+
+        .svg-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 25% 25%, rgba(102, 126, 234, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(118, 75, 162, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .svg-container.has-content {
+            border-style: solid;
+            border-color: rgba(102, 126, 234, 0.3);
+            background: rgba(15, 15, 25, 0.5);
+            box-shadow: 
+                0 8px 32px rgba(102, 126, 234, 0.15),
+                0 0 0 1px rgba(102, 126, 234, 0.1) inset;
+        }
+
+        .svg-container.has-content:hover {
+            transform: scale(1.01);
+            border-color: rgba(102, 126, 234, 0.5);
+            box-shadow: 
+                0 16px 48px rgba(102, 126, 234, 0.2),
+                0 0 0 1px rgba(102, 126, 234, 0.2) inset;
+        }
+
+        .svg-container svg {
+            max-width: 100%;
+            max-height: 100%;
+            filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.2));
+            transition: all 0.3s ease;
+        }
+
+        .svg-container:hover svg {
+            filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.3));
+        }
+
+        .placeholder-text {
+            color: #8e9aaf;
+            font-size: 1.2rem;
+            text-align: center;
+            font-weight: 300;
+            line-height: 1.6;
+            opacity: 0.8;
+            animation: placeholderPulse 2s ease-in-out infinite;
+            padding: 20px;
+            max-width: 80%;
+        }
+
+        @keyframes placeholderPulse {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 0.5; }
+        }
+
+        .animation-info {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.9), rgba(118, 75, 162, 0.9));
+            color: white;
+            padding: 12px 24px;
+            border-radius: 24px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            backdrop-filter: blur(20px);
+            box-shadow: 
+                0 8px 24px rgba(102, 126, 234, 0.3),
+                0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+            animation: infoFloat 3s ease-in-out infinite;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            z-index: 10;
+        }
+
+        .animation-info:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 
+                0 12px 32px rgba(102, 126, 234, 0.4),
+                0 0 0 1px rgba(255, 255, 255, 0.3) inset;
+        }
+
+        @keyframes infoFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-3px); }
+        }
+
+        .presets {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .preset-btn {
+            padding: 12px 16px;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            background: rgba(15, 15, 25, 0.4);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 0.9rem;
+            text-align: center;
+            font-weight: 500;
+            color: #cbd5e0;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .preset-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+            transition: left 0.6s;
+        }
+
+        .preset-btn:hover::before {
+            left: 100%;
+        }
+
+        .preset-btn:hover {
+            border-color: rgba(102, 126, 234, 0.5);
+            background: rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.2);
+            color: var(--accent);
+        }
+
+        .preset-btn:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        .stats-panel {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 30px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 
+                0 16px 48px rgba(102, 126, 234, 0.3),
+                0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+            backdrop-filter: blur(20px);
+        }
+
+        .stats-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .stats-panel h3 {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 1.4rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.6s;
+        }
+
+        .stat-item:hover::before {
+            left: 100%;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-4px) scale(1.02);
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            display: block;
+            margin-bottom: 8px;
+            background: linear-gradient(45deg, #ffffff, #f8f9fa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: statPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes statPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(233, 236, 239, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 20px 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) inset;
+            backdrop-filter: blur(10px);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 50%, var(--secondary) 100%);
+            background-size: 200% 100%;
+            width: 0%;
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 4px;
+            position: relative;
+            animation: progressShimmer 2s ease-in-out infinite;
+        }
+
+        @keyframes progressShimmer {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: progressGlow 1.5s ease-in-out infinite;
+        }
+
+        @keyframes progressGlow {
+            0%, 100% { transform: translateX(-100%); }
+            50% { transform: translateX(100%); }
+        }
+
+        .advanced-controls {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(15, 15, 25, 0.4);
+            border-radius: 12px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+
+        .checkbox-group label {
+            color: #cbd5e0;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .tooltip {
+            position: relative;
+            cursor: help;
+            display: inline-block;
+            margin-left: 5px;
+        }
+
+        .tooltip:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2c3e50;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            z-index: 1000;
+            min-width: 180px;
+            text-align: center;
+        }
+
+        .path-editor {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .path-input {
+            flex: 1;
+        }
+
+        .path-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .export-options {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .export-btn {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 12px;
+            background: rgba(26, 26, 39, 0.95);
+            color: white;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            border-left: 4px solid var(--success);
+            transform: translateX(120%);
+            transition: transform 0.3s ease-out;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification i {
+            font-size: 1.2rem;
+        }
+
+        .notification.success {
+            border-left-color: var(--success);
+        }
+
+        .notification.error {
+            border-left-color: var(--danger);
+        }
+
+        .notification.warning {
+            border-left-color: var(--warning);
+        }
+
+        @media (max-width: 768px) {
+            .button-group {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .header h1 {
+                font-size: 2.4rem;
+            }
+
+            .container {
+                padding: 20px;
+            }
+
+            .svg-container {
+                height: 350px;
+            }
+        }
+
+        .performance-meter {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(15, 15, 25, 0.7);
+            color: #a0aec0;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 10;
+        }
+
+        .fps-indicator {
+            color: var(--success);
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-draw-polygon"></i> SVG Path Animator Pro</h1>
+            <p>Advanced SVG path animation with professional controls, real-time preview, and export capabilities</p>
+        </div>
+
+        <div class="main-grid">
+            <div class="panel controls-panel">
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-icon"><i class="fas fa-pen"></i></div>
+                        <h3 class="section-title">SVG Path Input</h3>
+                    </div>
+                    <div class="path-editor">
+                        <div class="path-input">
+                            <div class="input-group">
+                                <label class="input-label" for="pathInput">
+                                    <i class="fas fa-code"></i>Enter SVG Path Data:
+                                </label>
+                                <textarea id="pathInput" placeholder="M 10 10 L 100 100 L 200 50 Z&#10;&#10;Or try one of the presets below..."></textarea>
+                            </div>
+                        </div>
+                        <div class="path-actions">
+                            <button class="btn btn-secondary" onclick="optimizePath()" title="Optimize path">
+                                <i class="fas fa-bolt"></i>
+                            </button>
+                            <button class="btn btn-secondary" onclick="clearPath()" title="Clear path">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="presets">
+                        <div class="preset-btn" onclick="loadPreset('heart')">
+                            <i class="fas fa-heart"></i> Heart
+                        </div>
+                        <div class="preset-btn" onclick="loadPreset('star')">
+                            <i class="fas fa-star"></i> Star
+                        </div>
+                        <div class="preset-btn" onclick="loadPreset('wave')">
+                            <i class="fas fa-wave-square"></i> Wave
+                        </div>
+                        <div class="preset-btn" onclick="loadPreset('spiral')">
+                            <i class="fas fa-infinity"></i> Spiral
+                        </div>
+                        <div class="preset-btn" onclick="loadPreset('polygon')">
+                            <i class="fas fa-shapes"></i> Polygon
+                        </div>
+                        <div class="preset-btn" onclick="loadPreset('bezier')">
+                            <i class="fas fa-project-diagram"></i> Bézier
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-icon"><i class="fas fa-sliders-h"></i></div>
+                        <h3 class="section-title">Animation Controls</h3>
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label" for="duration">
+                            <i class="fas fa-clock"></i>Duration (s):
+                            <span class="tooltip" data-tooltip="Total animation time in seconds">ⓘ</span>
+                        </label>
+                        <input type="range" id="duration" min="0.5" max="10" step="0.1" value="3">
+                        <div class="range-display">
+                            <span>0.5s</span>
+                            <span class="range-value" id="durationValue">3.0s</span>
+                            <span>10s</span>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label class="input-label" for="easing">
+                            <i class="fas fa-wave-square"></i>Easing Function:
+                        </label>
+                        <select id="easing">
+                            <option value="linear">Linear</option>
+                            <option value="ease">Ease</option>
+                            <option value="ease-in">Ease In</option>
+                            <option value="ease-out" selected>Ease Out</option>
+                            <option value="ease-in-out">Ease In-Out</option>
+                            <option value="cubic-bezier(0.68, -0.55, 0.265, 1.55)">Bounce</option>
+                            <option value="cubic-bezier(0.175, 0.885, 0.32, 1.275)">Back</option>
+                            <option value="cubic-bezier(0.34, 1.56, 0.64, 1)">Elastic</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label class="input-label" for="delay">
+                            <i class="fas fa-hourglass-half"></i>Delay (s):
+                            <span class="tooltip" data-tooltip="Delay before animation starts">ⓘ</span>
+                        </label>
+                        <input type="range" id="delay" min="0" max="3" step="0.1" value="0">
+                        <div class="range-display">
+                            <span>0s</span>
+                            <span class="range-value" id="delayValue">0.0s</span>
+                            <span>3s</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-icon"><i class="fas fa-paint-brush"></i></div>
+                        <h3 class="section-title">Stroke Properties</h3>
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label" for="strokeColor">
+                            <i class="fas fa-palette"></i>Stroke Color:
+                        </label>
+                        <input type="color" id="strokeColor" value="#667eea">
+                    </div>
+
+                    <div class="input-group">
+                        <label class="input-label" for="strokeWidth">
+                            <i class="fas fa-ruler"></i>Stroke Width:
+                        </label>
+                        <input type="range" id="strokeWidth" min="1" max="20" value="3">
+                        <div class="range-display">
+                            <span>1px</span>
+                            <span class="range-value" id="strokeWidthValue">3px</span>
+                            <span>20px</span>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label class="input-label" for="strokeOpacity">
+                            <i class="fas fa-low-vision"></i>Stroke Opacity:
+                        </label>
+                        <input type="range" id="strokeOpacity" min="0.1" max="1" step="0.1" value="1">
+                        <div class="range-display">
+                            <span>10%</span>
+                            <span class="range-value" id="strokeOpacityValue">100%</span>
+                            <span>100%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="advanced-controls">
+                    <div class="section-header">
+                        <div class="section-icon"><i class="fas fa-cogs"></i></div>
+                        <h3 class="section-title">Advanced Options</h3>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="showPath" checked>
+                        <label for="showPath">Show full path outline</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="reverseAnimation">
+                        <label for="reverseAnimation">Reverse animation</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="infiniteLoop" checked>
+                        <label for="infiniteLoop">Infinite loop</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="showPoints">
+                        <label for="showPoints">Show path points</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="autoOptimize" checked>
+                        <label for="autoOptimize">Auto-optimize path</label>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="startAnimation()">
+                        <i class="fas fa-play"></i> Start
+                    </button>
+                    <button class="btn btn-secondary" onclick="pauseAnimation()">
+                        <i class="fas fa-pause"></i> Pause
+                    </button>
+                    <button class="btn btn-danger" onclick="stopAnimation()">
+                        <i class="fas fa-stop"></i> Stop
+                    </button>
+                    <button class="btn btn-success" onclick="exportSVG()">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                </div>
+                
+                <div class="export-options">
+                    <button class="btn btn-warning export-btn" onclick="exportAsPNG()">
+                        <i class="fas fa-file-image"></i> PNG
+                    </button>
+                    <button class="btn btn-info export-btn" onclick="exportAsJSON()">
+                        <i class="fas fa-file-code"></i> JSON
+                    </button>
+                </div>
+            </div>
+
+            <div class="panel preview-panel">
+                <div class="animation-info" id="animationInfo">Ready to animate</div>
+                <div class="svg-container" id="svgContainer">
+                    <div class="placeholder-text">
+                        <strong>Enter an SVG path to preview</strong><br>
+                        Use the presets or paste your own path data
+                    </div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="performance-meter">
+                    <i class="fas fa-tachometer-alt"></i> Performance: 
+                    <span class="fps-indicator" id="fpsIndicator">60 FPS</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-panel">
+            <h3>Animation Statistics</h3>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-value" id="pathLength">0</span>
+                    <span class="stat-label">Path Length (px)</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="animationSpeed">0</span>
+                    <span class="stat-label">Speed (px/s)</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="currentProgress">0%</span>
+                    <span class="stat-label">Progress</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="remainingTime">0s</span>
+                    <span class="stat-label">Time Remaining</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="notification" id="notification">
+        <i class="fas fa-check-circle"></i>
+        <span id="notificationText">Operation completed successfully!</span>
+    </div>
+
+    <script>
+        // Global variables
+        let currentPath = null;
+        let animationId = null;
+        let isAnimating = false;
+        let isPaused = false;
+        let startTime = null;
+        let pausedTime = 0;
+        let pathLength = 0;
+        let frameCount = 0;
+        let lastFpsUpdate = 0;
+        let fps = 60;
+
+        // Preset paths
+        const presets = {
+            heart: "M12,21.35l-1.45-1.32C5.4,15.36,2,12.28,2,8.5 C2,5.42,4.42,3,7.5,3c1.74,0,3.41,0.81,4.5,2.09C13.09,3.81,14.76,3,16.5,3 C19.58,3,22,5.42,22,8.5c0,3.78-3.4,6.86-8.55,11.54L12,21.35z",
+            star: "M12,2l3.09,6.26L22,9.27l-5,4.87 L18.18,21L12,17.77L5.82,21L7,14.14L2,9.27l6.91-1.01L12,2z",
+            wave: "M0,50 Q25,25 50,50 T100,50 T150,50 T200,50 T250,50 T300,50",
+            spiral: "M150,150 Q150,100 200,100 Q250,100 250,150 Q250,200 200,200 Q150,200 150,150 Q150,125 175,125 Q225,125 225,150 Q225,175 200,175 Q175,175 175,150",
+            polygon: "M100,10 L40,198 L190,78 L10,78 L160,198 Z",
+            bezier: "M10,80 C40,10 65,10 95,80 S150,150 180,80"
+        };
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            setupEventListeners();
+            updateAllRangeDisplays();
+            loadPreset('heart');
+            
+            // Start FPS counter
+            setInterval(updateFPS, 1000);
+            requestAnimationFrame(updatePerformance);
+        });
+
+        function setupEventListeners() {
+            // Range input listeners
+            const ranges = ['duration', 'delay', 'strokeWidth', 'strokeOpacity'];
+            ranges.forEach(id => {
+                const element = document.getElementById(id);
+                element.addEventListener('input', () => {
+                    updateRangeDisplay(id);
+                    if (currentPath && !isAnimating) {
+                        updatePathPreview();
+                    }
+                });
+            });
+
+            // Path input listener
+            document.getElementById('pathInput').addEventListener('input', updatePathPreview);
+            
+            // Color picker listener
+            document.getElementById('strokeColor').addEventListener('input', updatePathPreview);
+            
+            // Checkbox listeners
+            document.getElementById('showPath').addEventListener('change', updatePathPreview);
+            document.getElementById('reverseAnimation').addEventListener('change', updatePathPreview);
+            document.getElementById('showPoints').addEventListener('change', updatePathPreview);
+            
+            // Easing selector
+            document.getElementById('easing').addEventListener('change', updatePathPreview);
+        }
+
+        function updateRangeDisplay(id) {
+            const element = document.getElementById(id);
+            const display = document.getElementById(id + 'Value');
+            let value = parseFloat(element.value);
+            
+            switch(id) {
+                case 'duration':
+                case 'delay':
+                    display.textContent = value.toFixed(1) + 's';
+                    break;
+                case 'strokeWidth':
+                    display.textContent = Math.round(value) + 'px';
+                    break;
+                case 'strokeOpacity':
+                    display.textContent = Math.round(value * 100) + '%';
+                    break;
+            }
+        }
+
+        function updateAllRangeDisplays() {
+            ['duration', 'delay', 'strokeWidth', 'strokeOpacity'].forEach(updateRangeDisplay);
+        }
+
+        function loadPreset(presetName) {
+            document.getElementById('pathInput').value = presets[presetName];
+            updatePathPreview();
+            showNotification(`Loaded "${presetName}" preset`, 'success');
+        }
+
+        function clearPath() {
+            document.getElementById('pathInput').value = '';
+            updatePathPreview();
+            showNotification('Path cleared', 'info');
+        }
+
+        function optimizePath() {
+            const pathData = document.getElementById('pathInput').value.trim();
+            if (!pathData) return;
+            
+            // Simple optimization - remove extra spaces
+            const optimized = pathData
+                .replace(/\s+/g, ' ')
+                .replace(/([a-zA-Z])\s+/g, '$1')
+                .replace(/\s([a-zA-Z])/g, '$1')
+                .trim();
+            
+            document.getElementById('pathInput').value = optimized;
+            updatePathPreview();
+            showNotification('Path optimized', 'success');
+        }
+
+        function updatePathPreview() {
+            const pathData = document.getElementById('pathInput').value.trim();
+            const container = document.getElementById('svgContainer');
+            
+            if (!pathData) {
+                container.innerHTML = '<div class="placeholder-text"><strong>Enter an SVG path to preview</strong><br>Use the presets or paste your own path data</div>';
+                container.classList.remove('has-content');
+                updateStats(0, 0, 0, 0);
+                return;
+            }
+
+            try {
+                // Auto-optimize if enabled
+                if (document.getElementById('autoOptimize').checked) {
+                    const optimized = pathData
+                        .replace(/\s+/g, ' ')
+                        .replace(/([a-zA-Z])\s+/g, '$1')
+                        .replace(/\s([a-zA-Z])/g, '$1')
+                        .trim();
+                    document.getElementById('pathInput').value = optimized;
+                }
+                
+                // Create SVG element
+                const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                svg.setAttribute('viewBox', '0 0 400 300');
+                svg.setAttribute('width', '100%');
+                svg.setAttribute('height', '100%');
+                svg.setAttribute('class', 'svg-preview');
+
+                // Create path element
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('d', pathData);
+                path.setAttribute('fill', 'none');
+                path.setAttribute('stroke', document.getElementById('strokeColor').value);
+                path.setAttribute('stroke-width', document.getElementById('strokeWidth').value);
+                path.setAttribute('stroke-opacity', document.getElementById('strokeOpacity').value);
+                path.setAttribute('stroke-linecap', 'round');
+                path.setAttribute('stroke-linejoin', 'round');
+                path.setAttribute('id', 'main-path');
+
+                // Show full path if checkbox is checked
+                if (document.getElementById('showPath').checked) {
+                    path.style.opacity = '0.3';
+                    const animatedPath = path.cloneNode(true);
+                    animatedPath.style.opacity = '1';
+                    svg.appendChild(path);
+                    svg.appendChild(animatedPath);
+                    currentPath = animatedPath;
+                } else {
+                    svg.appendChild(path);
+                    currentPath = path;
+                }
+                
+                // Show path points if enabled
+                if (document.getElementById('showPoints').checked) {
+                    const points = generatePathPoints(pathData);
+                    points.forEach(point => {
+                        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                        circle.setAttribute('cx', point.x);
+                        circle.setAttribute('cy', point.y);
+                        circle.setAttribute('r', '3');
+                        circle.setAttribute('fill', '#ff6b6b');
+                        circle.setAttribute('stroke', '#fff');
+                        circle.setAttribute('stroke-width', '1');
+                        svg.appendChild(circle);
+                    });
+                }
+
+                // Calculate path length
+                pathLength = path.getTotalLength();
+                
+                // Set up stroke-dasharray for animation
+                currentPath.style.strokeDasharray = pathLength;
+                currentPath.style.strokeDashoffset = pathLength;
+
+                container.innerHTML = '';
+                container.appendChild(svg);
+                container.classList.add('has-content');
+
+                // Update statistics
+                const duration = parseFloat(document.getElementById('duration').value);
+                const speed = Math.round(pathLength / duration);
+                updateStats(Math.round(pathLength), speed, 0, duration);
+
+                document.getElementById('animationInfo').textContent = 'Ready to animate';
+
+            } catch (error) {
+                container.innerHTML = '<div class="placeholder-text" style="color: #e74c3c;"><strong>Invalid SVG Path</strong><br>Please check your path data syntax</div>';
+                container.classList.remove('has-content');
+                console.error('SVG Path Error:', error);
+                showNotification('Invalid SVG path syntax', 'error');
+            }
+        }
+
+        function generatePathPoints(pathData) {
+            // Simplified point generation for demo
+            const points = [];
+            const segments = pathData.split(/(?=[A-Za-z])/).filter(s => s.trim());
+            
+            segments.forEach(segment => {
+                const command = segment.charAt(0);
+                const coords = segment.substring(1).trim().split(/[\s,]+/).map(Number).filter(n => !isNaN(n));
+                
+                if (['M', 'L', 'C', 'Q', 'S', 'T'].includes(command) && coords.length >= 2) {
+                    points.push({ x: coords[0], y: coords[1] });
+                }
+                
+                if (command === 'M' && coords.length > 2) {
+                    for (let i = 2; i < coords.length; i += 2) {
+                        points.push({ x: coords[i], y: coords[i+1] });
+                    }
+                }
+            });
+            
+            return points;
+        }
+
+        function startAnimation() {
+            if (!currentPath) {
+                showNotification('Please enter a valid SVG path first!', 'error');
+                return;
+            }
+
+            if (isPaused) {
+                resumeAnimation();
+                return;
+            }
+
+            stopAnimation();
+            isAnimating = true;
+            startTime = performance.now();
+            pausedTime = 0;
+
+            const duration = parseFloat(document.getElementById('duration').value) * 1000;
+            const delay = parseFloat(document.getElementById('delay').value) * 1000;
+            const easing = document.getElementById('easing').value;
+            const reverse = document.getElementById('reverseAnimation').checked;
+            const infinite = document.getElementById('infiniteLoop').checked;
+
+            document.getElementById('animationInfo').textContent = delay > 0 ? 'Starting...' : 'Animating';
+
+            function animate(currentTime) {
+                if (!isAnimating) return;
+
+                const elapsed = currentTime - startTime - pausedTime;
+                
+                if (elapsed < delay) {
+                    const remaining = Math.ceil((delay - elapsed) / 1000);
+                    document.getElementById('animationInfo').textContent = `Starting in ${remaining}s`;
+                    animationId = requestAnimationFrame(animate);
+                    return;
+                }
+
+                const progress = Math.min((elapsed - delay) / duration, 1);
+                const easedProgress = applyEasing(progress, easing);
+                
+                let dashOffset;
+                if (reverse) {
+                    dashOffset = pathLength * (1 - easedProgress);
+                } else {
+                    dashOffset = pathLength * (1 - easedProgress);
+                }
+
+                currentPath.style.strokeDashoffset = dashOffset;
+
+                // Update progress bar and stats
+                const progressPercent = Math.round(progress * 100);
+                document.getElementById('progressFill').style.width = progressPercent + '%';
+                
+                const remaining = Math.max(0, (duration - (elapsed - delay)) / 1000);
+                const speed = Math.round(pathLength / (parseFloat(document.getElementById('duration').value)));
+                updateStats(Math.round(pathLength), speed, progressPercent, remaining.toFixed(1));
+
+                document.getElementById('animationInfo').textContent = `Animating (${progressPercent}%)`;
+
+                if (progress < 1) {
+                    animationId = requestAnimationFrame(animate);
+                } else {
+                    if (infinite) {
+                        startTime = performance.now();
+                        pausedTime = 0;
+                        animationId = requestAnimationFrame(animate);
+                    } else {
+                        completeAnimation();
+                    }
+                }
+                
+                frameCount++;
+            }
+
+            animationId = requestAnimationFrame(animate);
+        }
+
+        function stopAnimation() {
+            isAnimating = false;
+            isPaused = false;
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+            }
+            
+            if (currentPath) {
+                currentPath.style.strokeDashoffset = pathLength;
+            }
+            
+            document.getElementById('progressFill').style.width = '0%';
+            document.getElementById('animationInfo').textContent = 'Stopped';
+            
+            const duration = parseFloat(document.getElementById('duration').value);
+            const speed = Math.round(pathLength / duration);
+            updateStats(Math.round(pathLength), speed, 0, duration);
+        }
+
+        function pauseAnimation() {
+            if (!isAnimating) return;
+            
+            isPaused = true;
+            isAnimating = false;
+            cancelAnimationFrame(animationId);
+            pausedTime = performance.now() - startTime;
+            document.getElementById('animationInfo').textContent = 'Paused';
+        }
+
+        function resumeAnimation() {
+            if (!isPaused) return;
+            
+            isPaused = false;
+            isAnimating = true;
+            startTime = performance.now() - pausedTime;
+            animationId = requestAnimationFrame(startAnimation);
+        }
+
+        function completeAnimation() {
+            isAnimating = false;
+            isPaused = false;
+            document.getElementById('animationInfo').textContent = 'Animation Complete';
+            document.getElementById('progressFill').style.width = '100%';
+            updateStats(Math.round(pathLength), Math.round(pathLength / parseFloat(document.getElementById('duration').value)), 100, 0);
+        }
+
+        function applyEasing(progress, easingFunction) {
+            switch(easingFunction) {
+                case 'linear':
+                    return progress;
+                case 'ease':
+                    return progress < 0.5 ? 2 * progress * progress : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+                case 'ease-in':
+                    return progress * progress;
+                case 'ease-out':
+                    return 1 - (1 - progress) * (1 - progress);
+                case 'ease-in-out':
+                    return progress < 0.5 ? 2 * progress * progress : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+                case 'cubic-bezier(0.68, -0.55, 0.265, 1.55)': // Bounce
+                    if (progress < 1/2.75) {
+                        return 7.5625 * progress * progress;
+                    } else if (progress < 2/2.75) {
+                        return 7.5625 * (progress -= 1.5/2.75) * progress + 0.75;
+                    } else if (progress < 2.5/2.75) {
+                        return 7.5625 * (progress -= 2.25/2.75) * progress + 0.9375;
+                    } else {
+                        return 7.5625 * (progress -= 2.625/2.75) * progress + 0.984375;
+                    }
+                case 'cubic-bezier(0.175, 0.885, 0.32, 1.275)': // Back
+                    const s = 1.70158;
+                    return progress * progress * ((s + 1) * progress - s);
+                case 'cubic-bezier(0.34, 1.56, 0.64, 1)': // Elastic
+                    return Math.sin(-13 * (progress + 1) * Math.PI/2) * Math.pow(2, -10 * progress) + 1;
+                default:
+                    return progress;
+            }
+        }
+
+        function updateStats(length, speed, progress, remaining) {
+            document.getElementById('pathLength').textContent = length.toLocaleString();
+            document.getElementById('animationSpeed').textContent = speed.toLocaleString();
+            document.getElementById('currentProgress').textContent = progress + '%';
+            document.getElementById('remainingTime').textContent = remaining + 's';
+        }
+
+        function exportSVG() {
+            if (!currentPath) {
+                showNotification('Please create an animation first!', 'error');
+                return;
+            }
+
+            const svg = document.querySelector('.svg-preview');
+            const svgData = new XMLSerializer().serializeToString(svg);
+            const blob = new Blob([svgData], { type: 'image/svg+xml' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'animated-path.svg';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showNotification('SVG exported successfully!', 'success');
+        }
+
+        function exportAsPNG() {
+            if (!currentPath) {
+                showNotification('Please create an animation first!', 'error');
+                return;
+            }
+
+            const svg = document.querySelector('.svg-preview');
+            const svgData = new XMLSerializer().serializeToString(svg);
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            const img = new Image();
+            img.onload = function() {
+                canvas.width = img.width;
+                canvas.height = img.height;
+                ctx.drawImage(img, 0, 0);
+                
+                const png = canvas.toDataURL('image/png');
+                const a = document.createElement('a');
+                a.href = png;
+                a.download = 'animated-path.png';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                
+                showNotification('PNG exported successfully!', 'success');
+            };
+            
+            const blob = new Blob([svgData], { type: 'image/svg+xml' });
+            img.src = URL.createObjectURL(blob);
+        }
+
+        function exportAsJSON() {
+            const pathData = document.getElementById('pathInput').value.trim();
+            if (!pathData) {
+                showNotification('No path data to export!', 'error');
+                return;
+            }
+            
+            const config = {
+                path: pathData,
+                duration: document.getElementById('duration').value,
+                easing: document.getElementById('easing').value,
+                delay: document.getElementById('delay').value,
+                strokeColor: document.getElementById('strokeColor').value,
+                strokeWidth: document.getElementById('strokeWidth').value,
+                strokeOpacity: document.getElementById('strokeOpacity').value,
+                showPath: document.getElementById('showPath').checked,
+                reverse: document.getElementById('reverseAnimation').checked,
+                infinite: document.getElementById('infiniteLoop').checked
+            };
+            
+            const json = JSON.stringify(config, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'path-animation.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showNotification('JSON exported successfully!', 'success');
+        }
+
+        function showNotification(message, type) {
+            const notification = document.getElementById('notification');
+            const text = document.getElementById('notificationText');
+            
+            text.textContent = message;
+            notification.className = 'notification ' + type;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case ' ': // Space
+                        e.preventDefault();
+                        if (isAnimating) {
+                            pauseAnimation();
+                        } else if (isPaused) {
+                            resumeAnimation();
+                        } else {
+                            startAnimation();
+                        }
+                        break;
+                    case 's': // Ctrl+S
+                        e.preventDefault();
+                        stopAnimation();
+                        break;
+                    case 'e': // Ctrl+E
+                        e.preventDefault();
+                        exportSVG();
+                        break;
+                }
+            } else if (e.key === 'Escape') {
+                stopAnimation();
+            }
+        });
+
+        // Performance monitoring
+        function updatePerformance() {
+            const currentTime = performance.now();
+            
+            if (currentTime - lastFpsUpdate >= 100) {
+                fps = Math.round(frameCount * 10);
+                frameCount = 0;
+                lastFpsUpdate = currentTime;
+                
+                document.getElementById('fpsIndicator').textContent = `${fps} FPS`;
+                document.getElementById('fpsIndicator').style.color = 
+                    fps > 55 ? '#27ae60' : fps > 40 ? '#f39c12' : '#e74c3c';
+            }
+            
+            requestAnimationFrame(updatePerformance);
+        }
+
+        function updateFPS() {
+            document.getElementById('fpsIndicator').textContent = `${fps} FPS`;
+            document.getElementById('fpsIndicator').style.color = 
+                fps > 55 ? '#27ae60' : fps > 40 ? '#f39c12' : '#e74c3c';
+        }
+    </script>
+</body>
+</html>
