@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVG Path Animator Pro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            font-weight: 300;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 30px;
+            height: calc(100vh - 200px);
+        }
+
+        .control-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow-y: auto;
+        }
+
+        .canvas-area {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .section {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .section:last-child {
+            border-bottom: none;
+        }
+
+        .section h3 {
+            margin-bottom: 15px;
+            color: #4a5568;
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #2d3748;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .range-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .range-group input[type="range"] {
+            flex: 1;
+        }
+
+        .range-value {
+            min-width: 60px;
+            text-align: center;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .color-group {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .color-group input[type="color"] {
+            width: 50px;
+            height: 40px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #718096 0%, #4a5568 100%);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #fc8181 0%, #e53e3e 100%);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .svg-container {
+            flex: 1;
+            border: 2px dashed #e2e8f0;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 400px;
+            background: #f8fafc;
+            position: relative;
+        }
+
+        .svg-container svg {
+            max-width: 100%;
+            max-height: 100%;
+            drop-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .timeline {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8fafc;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .timeline-track {
+            position: relative;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            margin: 10px 0;
+            cursor: pointer;
+        }
+
+        .timeline-progress {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 4px;
+            transition: width 0.1s ease;
+        }
+
+        .timeline-thumb {
+            position: absolute;
+            top: -6px;
+            width: 20px;
+            height: 20px;
+            background: #667eea;
+            border-radius: 50%;
+            cursor: grab;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: transform 0.2s ease;
+        }
+
+        .timeline-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .timeline-thumb:active {
+            cursor: grabbing;
+        }
+
+        .presets {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .preset-btn {
+            padding: 8px 12px;
+            font-size: 12px;
+            border-radius: 6px;
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            font-size: 14px;
+            color: #718096;
+        }
+
+        .frame-counter {
+            font-family: monospace;
+            font-weight: bold;
+        }
+
+        .export-section {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+
+        .export-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .recording {
+            animation: pulse 1s infinite;
+        }
+
+        .tooltip {
+            position: relative;
+            cursor: help;
+        }
+
+        .tooltip::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2d3748;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 1000;
+        }
+
+        .tooltip:hover::after {
+            opacity: 1;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+            
+            .control-panel {
+                order: 2;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>SVG Path Animator Pro</h1>
+            <p>Professional-grade SVG path animation with advanced controls</p>
+        </div>
+
+        <div class="main-content">
+            <div class="control-panel">
+                <div class="section">
+                    <h3>📝 SVG Path Input</h3>
+                    <div class="form-group">
+                        <label for="pathInput">SVG Path Data (d attribute)</label>
+                        <textarea id="pathInput" placeholder="Paste your SVG path here... e.g., M 10 10 L 90 90"></textarea>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn" onclick="loadPath()">Load Path</button>
+                        <button class="btn btn-secondary" onclick="loadSample()">Load Sample</button>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>🎬 Animation Controls</h3>
+                    <div class="form-group">
+                        <label for="animationType">Animation Type</label>
+                        <select id="animationType" onchange="updateAnimationType()">
+                            <option value="draw">Draw Path</option>
+                            <option value="erase">Erase Path</option>
+                            <option value="pulse">Pulse Effect</option>
+                            <option value="morph">Morphing</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group range-group">
+                        <label>Duration (seconds)</label>
+                        <input type="range" id="duration" min="0.5" max="10" step="0.1" value="3" oninput="updateDuration()">
+                        <span class="range-value" id="durationValue">3.0s</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="easingType">Easing Function</label>
+                        <select id="easingType" onchange="updateEasing()">
+                            <option value="linear">Linear</option>
+                            <option value="ease">Ease</option>
+                            <option value="ease-in">Ease In</option>
+                            <option value="ease-out">Ease Out</option>
+                            <option value="ease-in-out">Ease In-Out</option>
+                            <option value="cubic-bezier(0.68, -0.55, 0.265, 1.55)">Bounce</option>
+                            <option value="cubic-bezier(0.175, 0.885, 0.32, 1.275)">Back</option>
+                        </select>
+                    </div>
+
+                    <div class="btn-group">
+                        <button class="btn" onclick="playAnimation()">▶ Play</button>
+                        <button class="btn btn-secondary" onclick="pauseAnimation()">⏸ Pause</button>
+                        <button class="btn btn-secondary" onclick="resetAnimation()">⏹ Reset</button>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>🎨 Styling Options</h3>
+                    <div class="form-group color-group">
+                        <label for="strokeColor">Stroke Color</label>
+                        <input type="color" id="strokeColor" value="#667eea" onchange="updateStrokeColor()">
+                    </div>
+
+                    <div class="form-group range-group">
+                        <label>Stroke Width</label>
+                        <input type="range" id="strokeWidth" min="1" max="20" value="3" oninput="updateStrokeWidth()">
+                        <span class="range-value" id="strokeWidthValue">3px</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="strokeDasharray">Dash Pattern</label>
+                        <input type="text" id="strokeDasharray" placeholder="e.g., 5,5 or 10,2,3,2" onchange="updateDashArray()">
+                    </div>
+
+                    <div class="form-group color-group">
+                        <label for="backgroundColor">Background</label>
+                        <input type="color" id="backgroundColor" value="#f8fafc" onchange="updateBackground()">
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>⚡ Quick Presets</h3>
+                    <div class="presets">
+                        <button class="btn preset-btn" onclick="applyPreset('smooth')">Smooth Draw</button>
+                        <button class="btn preset-btn" onclick="applyPreset('fast')">Fast Draw</button>
+                        <button class="btn preset-btn" onclick="applyPreset('bounce')">Bouncy</button>
+                        <button class="btn preset-btn" onclick="applyPreset('elegant')">Elegant</button>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>📤 Export Options</h3>
+                    <div class="export-section">
+                        <div class="export-options">
+                            <button class="btn btn-secondary" onclick="exportSVG()">Export SVG</button>
+                            <button class="btn btn-secondary" onclick="exportCSS()">Export CSS</button>
+                            <button class="btn btn-secondary" onclick="exportGIF()" id="gifBtn">Export GIF</button>
+                            <button class="btn btn-secondary" onclick="copyCode()">Copy Code</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="canvas-area">
+                <div class="status-bar">
+                    <span class="frame-counter" id="frameCounter">Frame: 0 / 0</span>
+                    <span id="pathLength">Path Length: 0px</span>
+                    <span id="animationStatus">Ready</span>
+                </div>
+
+                <div class="svg-container" id="svgContainer">
+                    <div style="text-align: center; color: #718096;">
+                        <h3>Load an SVG path to begin</h3>
+                        <p>Paste your SVG path data and click "Load Path"</p>
+                    </div>
+                </div>
+
+                <div class="timeline">
+                    <h4>Animation Timeline</h4>
+                    <div class="timeline-track" id="timelineTrack">
+                        <div class="timeline-progress" id="timelineProgress"></div>
+                        <div class="timeline-thumb" id="timelineThumb"></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 12px; color: #718096; margin-top: 5px;">
+                        <span>0:00</span>
+                        <span id="totalTime">3:00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class SVGPathAnimator {
+            constructor() {
+                this.currentPath = null;
+                this.animationId = null;
+                this.isPlaying = false;
+                this.currentTime = 0;
+                this.duration = 3;
+                this.pathLength = 0;
+                this.svg = null;
+                this.pathElement = null;
+                this.startTime = 0;
+                this.easingFunction = 'ease-in-out';
+                this.animationType = 'draw';
+                
+                this.initializeTimeline();
+                this.loadSample();
+            }
+
+            initializeTimeline() {
+                const track = document.getElementById('timelineTrack');
+                const thumb = document.getElementById('timelineThumb');
+                let isDragging = false;
+
+                const updateThumbPosition = (progress) => {
+                    const trackWidth = track.offsetWidth;
+                    const thumbPosition = progress * trackWidth;
+                    thumb.style.left = thumbPosition + 'px';
+                    document.getElementById('timelineProgress').style.width = (progress * 100) + '%';
+                };
+
+                const handleMouseDown = (e) => {
+                    isDragging = true;
+                    this.pauseAnimation();
+                    document.addEventListener('mousemove', handleMouseMove);
+                    document.addEventListener('mouseup', handleMouseUp);
+                };
+
+                const handleMouseMove = (e) => {
+                    if (!isDragging) return;
+                    
+                    const rect = track.getBoundingClientRect();
+                    const progress = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+                    this.currentTime = progress * this.duration;
+                    updateThumbPosition(progress);
+                    this.updateAnimation(progress);
+                };
+
+                const handleMouseUp = () => {
+                    isDragging = false;
+                    document.removeEventListener('mousemove', handleMouseMove);
+                    document.removeEventListener('mouseup', handleMouseUp);
+                };
+
+                thumb.addEventListener('mousedown', handleMouseDown);
+                track.addEventListener('click', (e) => {
+                    if (isDragging) return;
+                    const rect = track.getBoundingClientRect();
+                    const progress = (e.clientX - rect.left) / rect.width;
+                    this.currentTime = progress * this.duration;
+                    updateThumbPosition(progress);
+                    this.updateAnimation(progress);
+                });
+
+                this.updateThumbPosition = updateThumbPosition;
+            }
+
+            loadPath(pathData) {
+                if (!pathData || pathData.trim() === '') {
+                    alert('Please enter a valid SVG path');
+                    return;
+                }
+
+                this.currentPath = pathData;
+                this.createSVG();
+                this.calculatePathLength();
+                this.resetAnimation();
+                this.updateStatus('Path loaded successfully');
+            }
+
+            createSVG() {
+                const container = document.getElementById('svgContainer');
+                container.innerHTML = '';
+
+                this.svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                this.svg.setAttribute('viewBox', '0 0 300 300');
+                this.svg.setAttribute('width', '100%');
+                this.svg.setAttribute('height', '100%');
+                this.svg.style.maxHeight = '500px';
+
+                this.pathElement = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                this.pathElement.setAttribute('d', this.currentPath);
+                this.pathElement.setAttribute('fill', 'none');
+                this.pathElement.setAttribute('stroke', document.getElementById('strokeColor').value);
+                this.pathElement.setAttribute('stroke-width', document.getElementById('strokeWidth').value);
+                this.pathElement.setAttribute('stroke-linecap', 'round');
+                this.pathElement.setAttribute('stroke-linejoin', 'round');
+
+                this.svg.appendChild(this.pathElement);
+                container.appendChild(this.svg);
+
+                // Auto-adjust viewBox based on path bounds
+                this.adjustViewBox();
+            }
+
+            adjustViewBox() {
+                if (!this.pathElement) return;
+                
+                try {
+                    const bbox = this.pathElement.getBBox();
+                    const padding = Math.max(bbox.width, bbox.height) * 0.1;
+                    const viewBox = `${bbox.x - padding} ${bbox.y - padding} ${bbox.width + padding * 2} ${bbox.height + padding * 2}`;
+                    this.svg.setAttribute('viewBox', viewBox);
+                } catch (e) {
+                    console.warn('Could not get bounding box, using default viewBox');
+                }
+            }
+
+            calculatePathLength() {
+                if (!this.pathElement) return;
+                
+                try {
+                    this.pathLength = this.pathElement.getTotalLength();
+                    document.getElementById('pathLength').textContent = `Path Length: ${Math.round(this.pathLength)}px`;
+                    
+                    // Set up stroke-dasharray for drawing animation
+                    if (this.animationType === 'draw' || this.animationType === 'erase') {
+                        this.pathElement.style.strokeDasharray = this.pathLength;
+                        this.pathElement.style.strokeDashoffset = this.animationType === 'draw' ? this.pathLength : 0;
+                    }
+                } catch (e) {
+                    console.warn('Could not calculate path length');
+                    this.pathLength = 0;
+                }
+            }
+
+            playAnimation() {
+                if (this.isPlaying) return;
+                if (!this.pathElement) {
+                    alert('Please load a path first');
+                    return;
+                }
+
+                this.isPlaying = true;
+                this.startTime = performance.now() - (this.currentTime * 1000);
+                this.animate();
+                this.updateStatus('Playing');
+                
+                // Update button states
+                document.querySelector('button[onclick="playAnimation()"]').style.opacity = '0.5';
+            }
+
+            pauseAnimation() {
+                this.isPlaying = false;
+                if (this.animationId) {
+                    cancelAnimationFrame(this.animationId);
+                }
+                this.updateStatus('Paused');
+                document.querySelector('button[onclick="playAnimation()"]').style.opacity = '1';
+            }
+
+            resetAnimation() {
+                this.pauseAnimation();
+                this.currentTime = 0;
+                this.updateAnimation(0);
+                this.updateThumbPosition(0);
+                this.updateStatus('Ready');
+                document.getElementById('frameCounter').textContent = 'Frame: 0 / 0';
+            }
+
+            animate() {
+                if (!this.isPlaying) return;
+
+                const elapsed = (performance.now() - this.startTime) / 1000;
+                const progress = Math.min(elapsed / this.duration, 1);
+                const easedProgress = this.applyEasing(progress);
+
+                this.currentTime = elapsed;
+                this.updateAnimation(easedProgress);
+                this.updateThumbPosition(progress);
+                
+                // Update frame counter
+                const totalFrames = Math.round(this.duration * 60); // Assuming 60fps
+                const currentFrame = Math.round(progress * totalFrames);
+                document.getElementById('frameCounter').textContent = `Frame: ${currentFrame} / ${totalFrames}`;
+
+                if (progress < 1) {
+                    this.animationId = requestAnimationFrame(() => this.animate());
+                } else {
+                    this.isPlaying = false;
+                    this.updateStatus('Complete');
+                    document.querySelector('button[onclick="playAnimation()"]').style.opacity = '1';
+                }
+            }
+
+            updateAnimation(progress) {
+                if (!this.pathElement || this.pathLength === 0) return;
+
+                switch (this.animationType) {
+                    case 'draw':
+                        const drawOffset = this.pathLength - (progress * this.pathLength);
+                        this.pathElement.style.strokeDashoffset = drawOffset;
+                        break;
+                        
+                    case 'erase':
+                        const eraseOffset = progress * this.pathLength;
+                        this.pathElement.style.strokeDashoffset = eraseOffset;
+                        break;
+                        
+                    case 'pulse':
+                        const pulseWidth = 3 + (Math.sin(progress * Math.PI * 4) * 2);
+                        this.pathElement.setAttribute('stroke-width', pulseWidth);
+                        break;
+                        
+                    case 'morph':
+                        const opacity = 0.3 + (Math.sin(progress * Math.PI * 2) * 0.7);
+                        this.pathElement.style.opacity = opacity;
+                        break;
+                }
+            }
+
+            applyEasing(t) {
+                switch (this.easingFunction) {
+                    case 'linear': return t;
+                    case 'ease-in': return t * t;
+                    case 'ease-out': return t * (2 - t);
+                    case 'ease-in-out': return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+                    case 'cubic-bezier(0.68, -0.55, 0.265, 1.55)': // Bounce
+                        return t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
+                    case 'cubic-bezier(0.175, 0.885, 0.32, 1.275)': // Back
+                        const c1 = 1.70158;
+                        const c3 = c1 + 1;
+                        return c3 * t * t * t - c1 * t * t;
+                    default: return t;
+                }
+            }
+
+            updateStatus(status) {
+                document.getElementById('animationStatus').textContent = status;
+            }
+
+            exportSVG() {
+                if (!this.svg) {
+                    alert('No SVG to export');
+                    return;
+                }
+
+                const svgData = new XMLSerializer().serializeToString(this.svg);
+                const blob = new Blob([svgData], { type: 'image/svg+xml' });
+                const url = URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'animated-path.svg';
+                a.click();
+                
+                URL.revokeObjectURL(url);
+            }
+
+            exportCSS() {
+                if (!this.pathElement) {
+                    alert('No path to export');
+                    return;
+                }
+
+                const css = `
+/* SVG Path Animation CSS */
+.animated-path {
+    stroke-dasharray: ${this.pathLength};
+    stroke-dashoffset: ${this.pathLength};
+    animation: drawPath ${this.duration}s ${this.easingFunction} forwards;
+}
+
+@keyframes drawPath {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+                `.trim();
+
+                const blob = new Blob([css], { type: 'text/css' });
+                const url = URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'path-animation.css';
+                a.click();
+                
+                URL.revokeObjectURL(url);
+            }
+
+            copyCode() {
+                if (!this.currentPath) {
+                    alert('No path to copy');
+                    return;
+                }
+
+                const code = `
+<!-- Animated SVG Path -->
+<svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+    <path d="${this.currentPath}" 
+          fill="none" 
+          stroke="${document.getElementById('strokeColor').value}" 
+          stroke-width="${document.getElementById('strokeWidth').value}"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-dasharray="${this.pathLength}"
+          stroke-dashoffset="${this.pathLength}">
+        <animate attributeName="stroke-dashoffset"
+                 values="${this.pathLength};0"
+                 dur="${this.duration}s"
+                 fill="freeze"/>
+    </path>
+</svg>
+                `.trim();
+
+                navigator.clipboard.writeText(code).then(() => {
+                    alert('Code copied to clipboard!');
+                });
+            }
+        }
+
+        // Initialize the animator
+        const animator = new SVGPathAnimator();
+
+        // Event handlers
+        function loadPath() {
+            const pathData = document.getElementById('pathInput').value.trim();
+            animator.loadPath(pathData);
+        }
+
+        function loadSample() {
+            const samplePath = "M 50 150 Q 100 50 150 150 T 250 150";
+            document.getElementById('pathInput').value = samplePath;
+            animator.loadPath(samplePath);
+        }
+
+        function playAnimation() {
+            animator.playAnimation();
+        }
+
+        function pauseAnimation() {
+            animator.pauseAnimation();
+        }
+
+        function resetAnimation() {
+            animator.resetAnimation();
+        }
+
+        function updateDuration() {
+            const duration = parseFloat(document.getElementById('duration').value);
+            animator.duration = duration;
+            document.getElementById('durationValue').textContent = duration.toFixed(1) + 's';
+            document.getElementById('totalTime').textContent = Math.floor(duration / 60) + ':' + String(Math.floor(duration % 60)).padStart(2, '0');
+        }
+
+        function updateEasing() {
+            animator.easingFunction = document.getElementById('easingType').value;
+        }
+
+        function updateAnimationType() {
+            animator.animationType = document.getElementById('animationType').value;
+            animator.calculatePathLength();
+        }
+
+        function updateStrokeColor() {
+            const color = document.getElementById('strokeColor').value;
+            if (animator.pathElement) {
+                animator.pathElement.setAttribute('stroke', color);
+            }
+        }
+
+        function updateStrokeWidth() {
+            const width = document.getElementById('strokeWidth').value;
+            document.getElementById('strokeWidthValue').textContent = width + 'px';
+            if (animator.pathElement) {
+                animator.pathElement.setAttribute('stroke-width', width);
+            }
+        }
+
+        function updateDashArray() {
+            const dashArray = document.getElementById('strokeDasharray').value;
+            if (animator.pathElement && dashArray) {
+                animator.pathElement.setAttribute('stroke-dasharray', dashArray);
+            }
+        }
+
+        function updateBackground() {
+            const color = document.getElementById('backgroundColor').value;
+            document.getElementById('svgContainer').style.backgroundColor = color;
+        }
+
+        function applyPreset(preset) {
+            switch (preset) {
+                case 'smooth':
+                    document.getElementById('duration').value = 4;
+                    document.getElementById('easingType').value = 'ease-in-out';
+                    document.getElementById('strokeWidth').value = 2;
+                    break;
+                case 'fast':
+                    document.getElementById('duration').value = 1.5;
+                    document.getElementById('easingType').value = 'ease-out';
+                    document.getElementById('strokeWidth').value = 4;
+                    break;
+                case 'bounce':
+                    document.getElementById('duration').value = 3;
+                    document.getElementById('easingType').value = 'cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+                    document.getElementById('strokeWidth').value = 3;
+                    break;
+                case 'elegant':
+                    document.getElementById('duration').value = 5;
+                    document.getElementById('easingType').value = 'cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                    document.getElementById('strokeWidth').value = 1;
+                    break;
+            }
+            
+            updateDuration();
+            updateEasing();
+            updateStrokeWidth();
+            
+            // Apply changes to current animation
+            if (animator.pathElement) {
+                animator.calculatePathLength();
+            }
+        }
+
+        function exportSVG() {
+            animator.exportSVG();
+        }
+
+        function exportCSS() {
+            animator.exportCSS();
+        }
+
+        function exportGIF() {
+            // This would require additional libraries for actual GIF creation
+            // For now, we'll show a message about the feature
+            alert('GIF export would require additional canvas-to-GIF libraries. This is a placeholder for the full implementation.');
+        }
+
+        function copyCode() {
+            animator.copyCode();
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            
+            switch (e.key) {
+                case ' ':
+                    e.preventDefault();
+                    if (animator.isPlaying) {
+                        pauseAnimation();
+                    } else {
+                        playAnimation();
+                    }
+                    break;
+                case 'r':
+                    resetAnimation();
+                    break;
+                case 'Escape':
+                    pauseAnimation();
+                    break;
+            }
+        });
+
+        // Auto-save to localStorage (if available)
+        function saveSettings() {
+            const settings = {
+                pathData: document.getElementById('pathInput').value,
+                duration: document.getElementById('duration').value,
+                easingType: document.getElementById('easingType').value,
+                strokeColor: document.getElementById('strokeColor').value,
+                strokeWidth: document.getElementById('strokeWidth').value,
+                animationType: document.getElementById('animationType').value
+            };
+            
+            try {
+                localStorage.setItem('svgAnimatorSettings', JSON.stringify(settings));
+            } catch (e) {
+                // localStorage not available
+                console.log('Settings could not be saved');
+            }
+        }
+
+        function loadSettings() {
+            try {
+                const saved = localStorage.getItem('svgAnimatorSettings');
+                if (saved) {
+                    const settings = JSON.parse(saved);
+                    document.getElementById('pathInput').value = settings.pathData || '';
+                    document.getElementById('duration').value = settings.duration || 3;
+                    document.getElementById('easingType').value = settings.easingType || 'ease-in-out';
+                    document.getElementById('strokeColor').value = settings.strokeColor || '#667eea';
+                    document.getElementById('strokeWidth').value = settings.strokeWidth || 3;
+                    document.getElementById('animationType').value = settings.animationType || 'draw';
+                    
+                    updateDuration();
+                    updateStrokeWidth();
+                }
+            } catch (e) {
+                // localStorage not available or corrupted
+                console.log('Settings could not be loaded');
+            }
+        }
+
+        // Auto-save settings when they change
+        ['pathInput', 'duration', 'easingType', 'strokeColor', 'strokeWidth', 'animationType'].forEach(id => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.addEventListener('change', saveSettings);
+            }
+        });
+
+        // Load settings on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSettings();
+            
+            // Add some sample paths for quick testing
+            const samplePaths = [
+                "M 50 150 Q 100 50 150 150 T 250 150", // Smooth curve
+                "M 50 50 L 250 50 L 250 250 L 50 250 Z", // Rectangle
+                "M 150 50 L 200 150 L 100 150 Z", // Triangle
+                "M 150 50 A 100 100 0 1 1 149 50 Z", // Circle
+                "M 50 150 C 50 100 100 100 150 150 S 250 200 250 150" // S-curve
+            ];
+            
+            // Add sample path buttons dynamically
+            const pathSection = document.querySelector('.section');
+            const sampleContainer = document.createElement('div');
+            sampleContainer.innerHTML = '<h4 style="margin: 15px 0 10px 0; color: #4a5568;">Quick Samples:</h4>';
+            
+            const sampleGrid = document.createElement('div');
+            sampleGrid.style.display = 'grid';
+            sampleGrid.style.gridTemplateColumns = '1fr 1fr';
+            sampleGrid.style.gap = '5px';
+            
+            const sampleNames = ['Curve', 'Rectangle', 'Triangle', 'Circle', 'S-Curve'];
+            samplePaths.forEach((path, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'btn preset-btn';
+                btn.style.fontSize = '11px';
+                btn.style.padding = '6px 8px';
+                btn.textContent = sampleNames[index];
+                btn.onclick = () => {
+                    document.getElementById('pathInput').value = path;
+                    animator.loadPath(path);
+                };
+                sampleGrid.appendChild(btn);
+            });
+            
+            sampleContainer.appendChild(sampleGrid);
+            pathSection.appendChild(sampleContainer);
+        });
+
+        // Add resize observer for responsive design
+        if (window.ResizeObserver) {
+            const resizeObserver = new ResizeObserver(() => {
+                if (animator.svg && animator.pathElement) {
+                    animator.adjustViewBox();
+                }
+            });
+            
+            resizeObserver.observe(document.getElementById('svgContainer'));
+        }
+
+        // Performance monitoring
+        let frameCount = 0;
+        let lastFrameTime = performance.now();
+        
+        function updatePerformanceStats() {
+            const now = performance.now();
+            frameCount++;
+            
+            if (now - lastFrameTime >= 1000) {
+                const fps = Math.round(frameCount * 1000 / (now - lastFrameTime));
+                console.log(`Animation FPS: ${fps}`);
+                frameCount = 0;
+                lastFrameTime = now;
+            }
+            
+            if (animator.isPlaying) {
+                requestAnimationFrame(updatePerformanceStats);
+            }
+        }
+
+        // Start performance monitoring when animation plays
+        const originalPlay = animator.playAnimation;
+        animator.playAnimation = function() {
+            originalPlay.call(this);
+            if (this.isPlaying) {
+                updatePerformanceStats();
+            }
+        };
+    </script>
+</body>
+</html>
