@@ -1,0 +1,1565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVG Path Animator Pro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 20px;
+            min-height: 100vh;
+        }
+
+        .control-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.1),
+                0 1px 0px rgba(255, 255, 255, 0.8) inset;
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .control-panel:hover {
+            box-shadow: 
+                0 25px 50px rgba(0, 0, 0, 0.15),
+                0 1px 0px rgba(255, 255, 255, 0.8) inset;
+            transform: translateY(-2px);
+        }
+
+        .main-area {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 35px;
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.1),
+                0 1px 0px rgba(255, 255, 255, 0.8) inset;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .main-area:hover {
+            box-shadow: 
+                0 25px 50px rgba(0, 0, 0, 0.15),
+                0 1px 0px rgba(255, 255, 255, 0.8) inset;
+        }
+
+        h1 {
+            color: #4a5568;
+            margin-bottom: 25px;
+            font-size: 2rem;
+            font-weight: 700;
+            text-align: center;
+            background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 2px;
+            animation: pulse-line 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        @keyframes pulse-line {
+            0% { width: 40px; opacity: 0.7; }
+            100% { width: 80px; opacity: 1; }
+        }
+
+        .section {
+            margin-bottom: 25px;
+            padding: 22px;
+            border: 1px solid rgba(226, 232, 240, 0.6);
+            border-radius: 16px;
+            background: linear-gradient(135deg, rgba(248, 250, 252, 0.8) 0%, rgba(255, 255, 255, 0.9) 100%);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.6), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .section:hover {
+            transform: translateY(-2px);
+            border-color: rgba(102, 126, 234, 0.3);
+            box-shadow: 
+                0 10px 25px rgba(102, 126, 234, 0.1),
+                0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .section:hover::before {
+            left: 100%;
+        }
+
+        .section h3 {
+            color: #2d3748;
+            margin-bottom: 18px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+        }
+
+        .section h3::before {
+            content: "▶";
+            color: #667eea;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
+
+        .section:hover h3::before {
+            color: #764ba2;
+            transform: scale(1.2);
+        }
+
+        .input-group {
+            margin-bottom: 18px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .input-group::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 1px;
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .input-group:focus-within::after {
+            width: 100%;
+        }
+
+        .input-group:hover {
+            transform: translateY(-1px);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #4a5568;
+            font-size: 0.9rem;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        label::before {
+            content: '';
+            position: absolute;
+            left: -4px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 2px;
+            height: 0;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 1px;
+            transition: height 0.3s ease;
+        }
+
+        .input-group:hover label::before,
+        .input-group:focus-within label::before {
+            height: 100%;
+        }
+
+        .input-group:hover label,
+        .input-group:focus-within label {
+            color: #667eea;
+            transform: translateX(8px);
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid rgba(226, 232, 240, 0.8);
+            border-radius: 12px;
+            font-size: 14px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(5px);
+            position: relative;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 
+                0 0 0 4px rgba(102, 126, 234, 0.1),
+                0 4px 12px rgba(102, 126, 234, 0.15);
+            transform: translateY(-1px);
+            background: rgba(255, 255, 255, 1);
+        }
+
+        input:hover, select:hover, textarea:hover {
+            border-color: rgba(102, 126, 234, 0.4);
+            transform: translateY(-1px);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .slider-container {
+            position: relative;
+            margin: 10px 0;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 8px;
+            background: linear-gradient(90deg, rgba(226, 232, 240, 0.6), rgba(203, 213, 224, 0.8));
+            border-radius: 6px;
+            outline: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) inset;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        input[type="range"]::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 6px;
+            transition: width 0.3s ease;
+        }
+
+        input[type="range"]:hover {
+            background: linear-gradient(90deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 
+                0 4px 12px rgba(102, 126, 234, 0.4),
+                0 0 0 4px rgba(255, 255, 255, 0.8),
+                0 0 0 6px rgba(102, 126, 234, 0.2);
+            position: relative;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+            box-shadow: 
+                0 6px 20px rgba(102, 126, 234, 0.5),
+                0 0 0 4px rgba(255, 255, 255, 0.9),
+                0 0 0 8px rgba(102, 126, 234, 0.3);
+        }
+
+        input[type="range"]::-webkit-slider-thumb:active {
+            transform: scale(1.05);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+            box-shadow: 
+                0 4px 12px rgba(102, 126, 234, 0.4),
+                0 0 0 4px rgba(255, 255, 255, 0.8);
+            transition: all 0.3s ease;
+        }
+
+        input[type="range"]::-moz-range-thumb:hover {
+            transform: scale(1.15);
+        }
+
+        .button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin: 5px;
+            box-shadow: 
+                0 6px 20px rgba(102, 126, 234, 0.3),
+                0 1px 0px rgba(255, 255, 255, 0.2) inset;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .button:hover {
+            transform: translateY(-3px);
+            box-shadow: 
+                0 8px 25px rgba(102, 126, 234, 0.4),
+                0 1px 0px rgba(255, 255, 255, 0.2) inset;
+        }
+
+        .button:hover::before {
+            left: 100%;
+        }
+
+        .button:active {
+            transform: translateY(-1px);
+            box-shadow: 
+                0 4px 15px rgba(102, 126, 234, 0.3),
+                0 1px 0px rgba(255, 255, 255, 0.2) inset;
+        }
+
+        .button.secondary {
+            background: linear-gradient(135deg, #718096 0%, #4a5568 100%);
+            box-shadow: 0 6px 20px rgba(113, 128, 150, 0.3);
+            position: relative;
+        }
+
+        .button.secondary::before {
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+        }
+
+        .button.secondary:hover {
+            background: linear-gradient(135deg, #8892b0 0%, #5a6578 100%);
+            box-shadow: 0 8px 25px rgba(113, 128, 150, 0.4);
+        }
+
+        .button.danger {
+            background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+            box-shadow: 0 6px 20px rgba(245, 101, 101, 0.3);
+            position: relative;
+        }
+
+        .button.danger::before {
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        }
+
+        .button.danger:hover {
+            background: linear-gradient(135deg, #fc8181 0%, #f56565 100%);
+            box-shadow: 0 8px 25px rgba(245, 101, 101, 0.4);
+        }
+
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 15px;
+        }
+
+        .svg-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 450px;
+            background: linear-gradient(135deg, rgba(248, 250, 252, 0.8) 0%, rgba(255, 255, 255, 0.9) 100%);
+            border-radius: 16px;
+            border: 2px dashed rgba(203, 213, 224, 0.6);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .svg-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(from 0deg, transparent, rgba(102, 126, 234, 0.03), transparent, rgba(118, 75, 162, 0.03), transparent);
+            animation: rotate-bg 20s linear infinite;
+            pointer-events: none;
+        }
+
+        .svg-container:hover {
+            border-color: rgba(102, 126, 234, 0.4);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.95) 100%);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.1);
+        }
+
+        @keyframes rotate-bg {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .svg-canvas {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 12px;
+            box-shadow: 
+                0 12px 30px rgba(0, 0, 0, 0.12),
+                0 4px 8px rgba(0, 0, 0, 0.05);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            z-index: 2;
+        }
+
+        .svg-canvas:hover {
+            transform: scale(1.02);
+            box-shadow: 
+                0 16px 40px rgba(0, 0, 0, 0.15),
+                0 6px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .preset-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .preset-button {
+            padding: 10px 14px;
+            font-size: 12px;
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 600;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(72, 187, 120, 0.25);
+        }
+
+        .preset-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .preset-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(72, 187, 120, 0.35);
+            background: linear-gradient(135deg, #4fd1c7 0%, #48bb78 100%);
+        }
+
+        .preset-button:hover::before {
+            left: 100%;
+        }
+
+        .preset-button:active {
+            transform: translateY(0);
+        }
+
+        .value-display {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            box-shadow: 0 3px 8px rgba(102, 126, 234, 0.3);
+            transition: all 0.2s ease;
+        }
+
+        .value-display:hover {
+            transform: translateY(-50%) scale(1.05);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(226, 232, 240, 0.6);
+            border-radius: 6px;
+            overflow: hidden;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) inset;
+            position: relative;
+        }
+
+        .progress-bar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            animation: shimmer-progress 2s infinite;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            width: 0%;
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 6px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: progress-shine 1.5s infinite;
+        }
+
+        @keyframes shimmer-progress {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        @keyframes progress-shine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 20px;
+            font-size: 12px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 12px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.8) 100%);
+            border-radius: 12px;
+            border: 1px solid rgba(226, 232, 240, 0.6);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, #667eea, #764ba2, #f093fb);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.15);
+            border-color: rgba(102, 126, 234, 0.3);
+        }
+
+        .stat-item:hover::before {
+            opacity: 1;
+        }
+
+        .stat-value {
+            font-weight: 700;
+            color: #667eea;
+            font-size: 16px;
+            margin-bottom: 4px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .export-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #718096;
+            font-size: 16px;
+            margin: 50px 0;
+            position: relative;
+            z-index: 2;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .empty-state svg {
+            width: 72px;
+            height: 72px;
+            margin-bottom: 20px;
+            opacity: 0.6;
+            transition: all 0.3s ease;
+            filter: drop-shadow(0 4px 8px rgba(102, 126, 234, 0.1));
+        }
+
+        .empty-state:hover svg {
+            opacity: 0.8;
+            transform: scale(1.1);
+            filter: drop-shadow(0 6px 12px rgba(102, 126, 234, 0.2));
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.05); }
+        }
+
+        .recording {
+            animation: pulse 1s infinite;
+        }
+
+        /* Advanced scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(226, 232, 240, 0.3);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #764ba2, #f093fb);
+        }
+
+        /* Loading states */
+        .loading {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .loading::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            animation: loading-shimmer 1.5s infinite;
+        }
+
+        @keyframes loading-shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        /* Focus ring improvements */
+        .focus-ring:focus {
+            outline: none;
+            box-shadow: 
+                0 0 0 3px rgba(102, 126, 234, 0.1),
+                0 0 0 6px rgba(102, 126, 234, 0.05);
+        }
+
+        /* Stagger animation for preset buttons */
+        .preset-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .preset-button:nth-child(1) { animation-delay: 0s; }
+        .preset-button:nth-child(2) { animation-delay: 0.1s; }
+        .preset-button:nth-child(3) { animation-delay: 0.2s; }
+        .preset-button:nth-child(4) { animation-delay: 0.3s; }
+
+        /* Typewriter effect for titles */
+        .typewriter {
+            overflow: hidden;
+            border-right: 2px solid rgba(102, 126, 234, 0.75);
+            white-space: nowrap;
+            animation: typewriter 3s steps(30, end), blink-caret 1s step-end infinite;
+        }
+
+        @keyframes typewriter {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+
+        @keyframes blink-caret {
+            from, to { border-color: transparent; }
+            50% { border-color: rgba(102, 126, 234, 0.75); }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+                padding: 15px;
+                gap: 15px;
+            }
+            
+            .control-panel {
+                position: relative;
+                top: 0;
+                padding: 20px;
+                margin-bottom: 0;
+            }
+
+            .main-area {
+                padding: 20px;
+            }
+
+            .svg-container {
+                min-height: 300px;
+            }
+
+            h1 {
+                font-size: 1.6rem;
+                margin-bottom: 20px;
+            }
+
+            .section {
+                padding: 16px;
+                margin-bottom: 20px;
+            }
+
+            .button-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .button {
+                margin: 4px 0;
+                padding: 12px 20px;
+            }
+
+            .preset-buttons {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
+            .export-options {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
+            /* Enhanced mobile touch targets */
+            input[type="range"] {
+                height: 12px;
+            }
+
+            input[type="range"]::-webkit-slider-thumb {
+                width: 28px;
+                height: 28px;
+            }
+
+            .color-input {
+                width: 80px;
+                height: 60px;
+            }
+
+            /* Mobile-first animations */
+            .section:hover {
+                transform: none;
+            }
+
+            .button:hover {
+                transform: translateY(-1px);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 1.4rem;
+            }
+
+            .control-panel, .main-area {
+                padding: 15px;
+                border-radius: 15px;
+            }
+
+            .section {
+                padding: 12px;
+            }
+
+            .svg-container {
+                min-height: 250px;
+            }
+        }
+
+        /* High contrast mode support */
+        @media (prefers-contrast: high) {
+            .section {
+                border: 2px solid #000;
+                background: #fff;
+            }
+
+            .button {
+                border: 2px solid #000;
+            }
+
+            input, select, textarea {
+                border: 2px solid #000;
+            }
+        }
+
+        /* Reduced motion preferences */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+
+            .empty-state {
+                animation: none;
+            }
+
+            .svg-container::before {
+                animation: none;
+            }
+        }
+
+        /* Print styles */
+        @media print {
+            body {
+                background: white;
+                color: black;
+            }
+
+            .control-panel, .main-area {
+                background: white;
+                box-shadow: none;
+                border: 1px solid #ccc;
+            }
+
+            .button, .preset-button {
+                background: white;
+                color: black;
+                border: 1px solid #ccc;
+            }
+        }
+
+        .color-input {
+            width: 60px;
+            height: 50px;
+            border: 3px solid rgba(226, 232, 240, 0.8);
+            border-radius: 12px;
+            cursor: pointer;
+            padding: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .color-input::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(135deg, #667eea, #764ba2, #f093fb, #667eea);
+            border-radius: 12px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: -1;
+        }
+
+        .color-input:hover {
+            transform: scale(1.05) rotate(2deg);
+            border-color: rgba(102, 126, 234, 0.5);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .color-input:hover::before {
+            opacity: 0.7;
+        }
+
+        .color-input:active {
+            transform: scale(0.95);
+        }
+
+        /* Advanced tooltip system */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 220px;
+            background: linear-gradient(135deg, rgba(45, 55, 72, 0.95), rgba(26, 32, 44, 0.95));
+            backdrop-filter: blur(10px);
+            color: #fff;
+            text-align: center;
+            border-radius: 12px;
+            padding: 12px 16px;
+            position: absolute;
+            z-index: 1000;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -110px;
+            font-size: 13px;
+            font-weight: 500;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateY(10px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .tooltip .tooltiptext::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -8px;
+            border-width: 8px;
+            border-style: solid;
+            border-color: rgba(45, 55, 72, 0.95) transparent transparent transparent;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Enhanced notification system */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(72, 187, 120, 0.3);
+            transform: translateX(400px);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.error {
+            background: linear-gradient(135deg, #f56565, #e53e3e);
+            box-shadow: 0 10px 30px rgba(245, 101, 101, 0.3);
+        }
+
+        /* Context menu styling */
+        .context-menu {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: 12px;
+            padding: 8px 0;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            z-index: 1000;
+            min-width: 180px;
+            opacity: 0;
+            transform: scale(0.95) translateY(-10px);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .context-menu.show {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+
+        .context-menu-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14px;
+            color: #2d3748;
+        }
+
+        .context-menu-item:hover {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            color: #667eea;
+        }
+
+        /* Advanced loading states */
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s infinite;
+            border-radius: 8px;
+        }
+
+        @keyframes skeleton-loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* Interactive button states */
+        .button-group .button {
+            position: relative;
+        }
+
+        .button-group .button.active {
+            background: linear-gradient(135deg, #38a169, #2f855a);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(56, 161, 105, 0.4);
+        }
+
+        .button-group .button.active::after {
+            content: '✓';
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 20px;
+            height: 20px;
+            background: #48bb78;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: white;
+            animation: check-bounce 0.5s ease;
+        }
+
+        @keyframes check-bounce {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="control-panel">
+            <h1>SVG Path Animator Pro</h1>
+            
+            <div class="section">
+                <h3>Path Input</h3>
+                <div class="input-group">
+                    <label for="pathInput">SVG Path Data:</label>
+                    <textarea id="pathInput" placeholder="Enter SVG path data (e.g., M10,10 L90,90 L10,90 Z)"></textarea>
+                </div>
+                <div class="preset-buttons">
+                    <button class="preset-button" onclick="loadPreset('heart')">♥ Heart</button>
+                    <button class="preset-button" onclick="loadPreset('star')">★ Star</button>
+                    <button class="preset-button" onclick="loadPreset('wave')">~ Wave</button>
+                    <button class="preset-button" onclick="loadPreset('spiral')">◉ Spiral</button>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>Animation Controls</h3>
+                <div class="input-group">
+                    <label for="duration">Duration (seconds):</label>
+                    <div class="slider-container">
+                        <input type="range" id="duration" min="0.5" max="10" step="0.1" value="3">
+                        <div class="value-display" id="durationValue">3.0s</div>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label for="easing">Easing Function:</label>
+                    <select id="easing">
+                        <option value="linear">Linear</option>
+                        <option value="ease">Ease</option>
+                        <option value="ease-in">Ease In</option>
+                        <option value="ease-out" selected>Ease Out</option>
+                        <option value="ease-in-out">Ease In Out</option>
+                        <option value="cubic-bezier(0.68, -0.55, 0.265, 1.55)">Bounce</option>
+                        <option value="cubic-bezier(0.175, 0.885, 0.32, 1.275)">Back</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="delay">Delay (seconds):</label>
+                    <div class="slider-container">
+                        <input type="range" id="delay" min="0" max="3" step="0.1" value="0">
+                        <div class="value-display" id="delayValue">0.0s</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>Stroke Styling</h3>
+                <div class="input-group">
+                    <label for="strokeColor">Stroke Color:</label>
+                    <input type="color" id="strokeColor" class="color-input" value="#667eea">
+                </div>
+                <div class="input-group">
+                    <label for="strokeWidth">Stroke Width:</label>
+                    <div class="slider-container">
+                        <input type="range" id="strokeWidth" min="1" max="20" step="0.5" value="3">
+                        <div class="value-display" id="strokeWidthValue">3px</div>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label for="strokeDasharray">Dash Pattern:</label>
+                    <input type="text" id="strokeDasharray" placeholder="e.g., 5,5 or 10,5,2,5">
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>Advanced Options</h3>
+                <div class="input-group">
+                    <label for="direction">Animation Direction:</label>
+                    <select id="direction">
+                        <option value="normal">Normal</option>
+                        <option value="reverse">Reverse</option>
+                        <option value="alternate">Alternate</option>
+                        <option value="alternate-reverse">Alternate Reverse</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="iterations">Iterations:</label>
+                    <select id="iterations">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="5">5</option>
+                        <option value="infinite">Infinite</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="fillMode">Fill Mode:</label>
+                    <select id="fillMode">
+                        <option value="none">None</option>
+                        <option value="forwards" selected>Forwards</option>
+                        <option value="backwards">Backwards</option>
+                        <option value="both">Both</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="button" onclick="startAnimation()">▶ Animate</button>
+                <button class="button secondary" onclick="pauseAnimation()">⏸ Pause</button>
+                <button class="button secondary" onclick="resetAnimation()">⏹ Reset</button>
+                <button class="button danger" onclick="clearPath()">🗑 Clear</button>
+            </div>
+
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="pathLength">0</div>
+                    <div>Path Length</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="animationTime">0.0s</div>
+                    <div>Elapsed Time</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>Export Options</h3>
+                <div class="export-options">
+                    <button class="button secondary" onclick="exportSVG()">📥 Export SVG</button>
+                    <button class="button secondary" onclick="exportCSS()">📋 Copy CSS</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-area">
+            <div class="svg-container" id="svgContainer">
+                <div class="empty-state">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.1 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                    </svg>
+                    <div>Enter an SVG path to begin animating</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentAnimation = null;
+        let animationStartTime = 0;
+        let animationDuration = 3000;
+        let currentPath = null;
+        let pathLength = 0;
+
+        // Preset paths
+        const presets = {
+            heart: "M12,21.35l-1.45-1.32C5.4,15.36,2,12.28,2,8.5 C2,5.42,4.42,3,7.5,3c1.74,0,3.41,0.81,4.5,2.09C13.09,3.81,14.76,3,16.5,3 C19.58,3,22,5.42,22,8.5c0,3.78-3.4,6.86-8.55,11.54L12,21.35z",
+            star: "M12,2l3.09,6.26L22,9.27l-5,4.87 L18.18,21L12,17.77L5.82,21L7,14.14L2,9.27l6.91-1.01L12,2z",
+            wave: "M2,12 Q8,2 14,12 T26,12 Q32,22 38,12 T50,12",
+            spiral: "M25,25 Q25,5 45,25 Q65,45 45,65 Q25,85 5,65 Q-15,45 5,25 Q25,5 45,25"
+        };
+
+        // Initialize event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            setupEventListeners();
+            updateValueDisplays();
+        });
+
+        function setupEventListeners() {
+            // Input change listeners
+            document.getElementById('pathInput').addEventListener('input', handlePathInput);
+            document.getElementById('duration').addEventListener('input', updateValueDisplays);
+            document.getElementById('delay').addEventListener('input', updateValueDisplays);
+            document.getElementById('strokeWidth').addEventListener('input', updateValueDisplays);
+            
+            // Real-time style updates
+            document.getElementById('strokeColor').addEventListener('input', updatePathStyle);
+            document.getElementById('strokeWidth').addEventListener('input', updatePathStyle);
+            document.getElementById('strokeDasharray').addEventListener('input', updatePathStyle);
+        }
+
+        function updateValueDisplays() {
+            const duration = document.getElementById('duration').value;
+            const delay = document.getElementById('delay').value;
+            const strokeWidth = document.getElementById('strokeWidth').value;
+            
+            document.getElementById('durationValue').textContent = parseFloat(duration).toFixed(1) + 's';
+            document.getElementById('delayValue').textContent = parseFloat(delay).toFixed(1) + 's';
+            document.getElementById('strokeWidthValue').textContent = strokeWidth + 'px';
+            
+            animationDuration = parseFloat(duration) * 1000;
+        }
+
+        function handlePathInput() {
+            const pathData = document.getElementById('pathInput').value.trim();
+            if (pathData) {
+                createSVGPath(pathData);
+            } else {
+                clearPath();
+            }
+        }
+
+        function createSVGPath(pathData) {
+            const container = document.getElementById('svgContainer');
+            container.innerHTML = '';
+
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('viewBox', '0 0 100 100');
+            svg.setAttribute('width', '400');
+            svg.setAttribute('height', '400');
+            svg.classList.add('svg-canvas');
+
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('d', pathData);
+            path.setAttribute('fill', 'none');
+            path.setAttribute('stroke', document.getElementById('strokeColor').value);
+            path.setAttribute('stroke-width', document.getElementById('strokeWidth').value);
+            path.setAttribute('stroke-linecap', 'round');
+            path.setAttribute('stroke-linejoin', 'round');
+            
+            const dasharray = document.getElementById('strokeDasharray').value;
+            if (dasharray) {
+                path.setAttribute('stroke-dasharray', dasharray);
+            }
+
+            svg.appendChild(path);
+            container.appendChild(svg);
+
+            currentPath = path;
+            pathLength = path.getTotalLength();
+            
+            // Update stats
+            document.getElementById('pathLength').textContent = Math.round(pathLength);
+            
+            // Set up for animation
+            path.style.strokeDasharray = pathLength;
+            path.style.strokeDashoffset = pathLength;
+        }
+
+        function updatePathStyle() {
+            if (!currentPath) return;
+            
+            const strokeColor = document.getElementById('strokeColor').value;
+            const strokeWidth = document.getElementById('strokeWidth').value;
+            const dasharray = document.getElementById('strokeDasharray').value;
+            
+            currentPath.setAttribute('stroke', strokeColor);
+            currentPath.setAttribute('stroke-width', strokeWidth);
+            
+            if (dasharray) {
+                currentPath.setAttribute('stroke-dasharray', dasharray);
+            } else {
+                currentPath.removeAttribute('stroke-dasharray');
+                currentPath.style.strokeDasharray = pathLength;
+            }
+        }
+
+        function startAnimation() {
+            if (!currentPath) {
+                alert('Please enter an SVG path first!');
+                return;
+            }
+
+            resetAnimation();
+
+            const duration = parseFloat(document.getElementById('duration').value);
+            const delay = parseFloat(document.getElementById('delay').value);
+            const easing = document.getElementById('easing').value;
+            const direction = document.getElementById('direction').value;
+            const iterations = document.getElementById('iterations').value;
+            const fillMode = document.getElementById('fillMode').value;
+
+            // Apply animation
+            currentPath.style.animation = `drawPath ${duration}s ${easing} ${delay}s ${iterations} ${direction} ${fillMode}`;
+
+            // Update CSS animation keyframes
+            updateAnimationKeyframes();
+
+            animationStartTime = Date.now() + (delay * 1000);
+            
+            // Start progress tracking
+            trackProgress();
+        }
+
+        function updateAnimationKeyframes() {
+            // Remove existing keyframes
+            const existingStyle = document.getElementById('dynamicStyles');
+            if (existingStyle) {
+                existingStyle.remove();
+            }
+
+            // Create new keyframes
+            const style = document.createElement('style');
+            style.id = 'dynamicStyles';
+            style.textContent = `
+                @keyframes drawPath {
+                    from {
+                        stroke-dashoffset: ${pathLength};
+                    }
+                    to {
+                        stroke-dashoffset: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        function pauseAnimation() {
+            if (currentPath) {
+                currentPath.style.animationPlayState = 
+                    currentPath.style.animationPlayState === 'paused' ? 'running' : 'paused';
+            }
+        }
+
+        function resetAnimation() {
+            if (currentPath) {
+                currentPath.style.animation = 'none';
+                currentPath.style.strokeDashoffset = pathLength;
+                document.getElementById('progressFill').style.width = '0%';
+                document.getElementById('animationTime').textContent = '0.0s';
+            }
+        }
+
+        function clearPath() {
+            const container = document.getElementById('svgContainer');
+            container.innerHTML = `
+                <div class="empty-state">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.1 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                    </svg>
+                    <div>Enter an SVG path to begin animating</div>
+                </div>
+            `;
+            currentPath = null;
+            pathLength = 0;
+            document.getElementById('pathInput').value = '';
+            document.getElementById('pathLength').textContent = '0';
+            document.getElementById('progressFill').style.width = '0%';
+            document.getElementById('animationTime').textContent = '0.0s';
+        }
+
+        function loadPreset(presetName) {
+            const pathData = presets[presetName];
+            document.getElementById('pathInput').value = pathData;
+            createSVGPath(pathData);
+        }
+
+        function trackProgress() {
+            if (!currentPath || animationStartTime === 0) return;
+
+            const now = Date.now();
+            const elapsed = Math.max(0, now - animationStartTime);
+            const progress = Math.min(elapsed / animationDuration, 1);
+
+            document.getElementById('progressFill').style.width = (progress * 100) + '%';
+            document.getElementById('animationTime').textContent = (elapsed / 1000).toFixed(1) + 's';
+
+            if (progress < 1) {
+                requestAnimationFrame(trackProgress);
+            }
+        }
+
+        function exportSVG() {
+            if (!currentPath) {
+                alert('No path to export!');
+                return;
+            }
+
+            const svg = currentPath.parentElement;
+            const svgData = new XMLSerializer().serializeToString(svg);
+            const blob = new Blob([svgData], { type: 'image/svg+xml' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'animated-path.svg';
+            a.click();
+            
+            URL.revokeObjectURL(url);
+        }
+
+        function exportCSS() {
+            if (!currentPath) {
+                alert('No animation to export!');
+                return;
+            }
+
+            const duration = document.getElementById('duration').value;
+            const easing = document.getElementById('easing').value;
+            const delay = document.getElementById('delay').value;
+
+            const cssCode = `
+/* SVG Path Animation CSS */
+.animated-path {
+    stroke-dasharray: ${pathLength};
+    stroke-dashoffset: ${pathLength};
+    animation: drawPath ${duration}s ${easing} ${delay}s forwards;
+}
+
+@keyframes drawPath {
+    from {
+        stroke-dashoffset: ${pathLength};
+    }
+    to {
+        stroke-dashoffset: 0;
+    }
+}`;
+
+            navigator.clipboard.writeText(cssCode).then(() => {
+                alert('CSS animation code copied to clipboard!');
+            }).catch(() => {
+                alert('Failed to copy CSS code. Please try again.');
+            });
+        }
+
+        // Initialize the app
+        updateValueDisplays();
+    </script>
+</body>
+</html>
